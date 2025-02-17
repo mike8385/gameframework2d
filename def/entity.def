@@ -1,0 +1,8 @@
+{
+	"name" : "player_class",
+	"bounds" : [25, 36, 80, 52],
+	"sprite" : "images/ed210.png",
+	"spriteSize" : [128, 128],
+	"spriteFPL" : 16,
+	"speedMax" : 4
+}

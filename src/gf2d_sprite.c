@@ -17,7 +17,8 @@ typedef struct
     Sprite * sprite_list;
 }SpriteManager;
 
-static SpriteManager sprite_manager;
+static SpriteManager sprite_manager = { 0 };
+//Global only to this file (Static)
 
 void gf2d_sprite_close()
 {
@@ -106,7 +107,7 @@ Sprite *gf2d_sprite_new()
     return NULL;
 }
 
-Sprite *gf2d_sprite_get_by_filename(const char * filename)
+Sprite *gf2d_sprite_get_by_filename(const char * filename)  //I can use this code and make similar but get by something else
 {
     int i;
     if (!filename)
