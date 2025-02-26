@@ -29,7 +29,7 @@ int main(int argc, char * argv[])
     Entity* monster;
     GFC_Vector2D position = gfc_vector2d(100.0f, 100.0f);
     GFC_Vector2D monsterposition = gfc_vector2d(500.0f, 100.0f);
-    GFC_Rect rectangle = gfc_rect(100, 100, 500, 500);
+    GFC_Rect rectangle = gfc_rect(100, 100, 1000, 500);
     
     /*program initializtion*/
     init_logger("gf2d.log",0);
@@ -49,6 +49,7 @@ int main(int argc, char * argv[])
     
     /*demo setup*/
     sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
+
     mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16,0);
     player = player_new_entity(position);
     monster = monster_new_entity(monsterposition);
@@ -67,6 +68,8 @@ int main(int argc, char * argv[])
 
         entity_system_think();
         entity_system_update();
+        entity_system_move();
+        entity_bounds_update(player);
         
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame

@@ -5,15 +5,24 @@
 #include "world.h"
 
 
+typedef struct {
+	World* worldData;
+	//U///int32 entity_max;
+	//Entity* entity_list;
+}WorldSystem;
+
+static WorldSystem world_system = { 0 }; /**<Initalize a LOCAL global entity manager*/
+
+
 World* world_test_new()
 {
 	int i, j;
-	int width = 65, height = 45;
+	int width = 500, height = 500;
 	World* world;
 	world = world_new(width,height);
 	if (!world) return NULL;
 	
-	world->background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
+	world->background = gf2d_sprite_load_image("images/backgrounds/battlegrounds/PNG/Battleground2/Pale/Battleground2.png");
 	world->tileSet = gf2d_sprite_load_all(
 		"images/backgrounds/tileset1.png",
 		16,
@@ -30,6 +39,8 @@ World* world_test_new()
 		world->tileMap[i*width] = 1;
 		world->tileMap[i*width + (width-1)] = 1;
 	}
+	world->bounds = gfc_rect(100, 100, 1000, 500);
+	world_system.worldData = world;
 	return world;
 }
 
@@ -116,5 +127,10 @@ void* world_draw(World* world)
 		}
 	}
 	
+}
+
+GFC_Rect get_world_bounds()
+{
+	return world_system.worldData->bounds;
 }
 

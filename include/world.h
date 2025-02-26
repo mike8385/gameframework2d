@@ -13,7 +13,6 @@ typedef struct
 	Uint8*			tileMap;				/**<The tiles that make up the world*/
 	Uint32			tileHeight;				/**<How many tiles tall the map is*/
 	Uint32			tileWidth;				/**<How many tiles long the map is*/
-
 }World;
 
 /**
@@ -39,6 +38,12 @@ void world_free(World *world);
 * @param world the world to draw
 */
 void* world_draw(World* world);
+
+
+/*
+* @brief gets world bounds
+*/
+GFC_Rect get_world_bounds();
 
 
 #endif

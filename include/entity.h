@@ -10,22 +10,57 @@
 #include "gfc_shape.h"
 #include "world.h"
 
+//typedef enum
+//{
+//
+//} EntityTeamType;
+//
+//typedef enum
+//{
+//
+//}EntityCollisionLayers;
+
+
+typedef enum
+{
+	ETC_entity = 1,
+	ETC_world = 2,
+	ETC_other = 3,
+	ETC_magic = 4,
+	ETC_monster = 5,
+	ETC_MAX = 15
+} EntityTypeCollide;
 
 typedef struct Entity_S
 {
-	Uint8			_inuse;						/**<Memory management flag*/
-	GFC_TextLine	name;						/**<Name of the entity for debugging*/
-	GFC_Rect		bounds;						/**<Entity Bounds*/
-	GFC_Vector2D	ground;
-	Sprite*			sprite;						/**<Graphical representation of entity*/
-	float			frame;						/**<for drawing the sprite*/
-	GFC_Vector2D	position;					/**<Were to draw it*/
-	GFC_Vector2D	velocity;					/**<how we are moving*/
-	GFC_Vector2D	acceleration;
+	Uint8					_inuse;						/**<Memory management flag*/
+	GFC_TextLine			name;						/**<Name of the entity for debugging*/
+	GFC_Rect				bounds;						/**<Entity Bounds*/
+	GFC_Vector2D			ground;
+	Sprite*					sprite;						/**<Graphical representation of entity*/
+	float					frame;						/**<for drawing the sprite*/
+	GFC_Vector2D			position;					/**<Were to draw it*/
+	GFC_Vector2D			velocity;					/**<how we are moving*/
+	GFC_Vector2D			acceleration;
+	EntityTypeCollide		collidedType;
+	float					magicCooldown;
+	Uint32					lastAttackTime;
+
+
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/
 	void (*update)(struct Entity_S* self);		/**<Function to call to execute those decisions*/
+	void (*attack)(struct Entity_S* self);		/**<Function to call to attack*/
+	void (*damage)(struct Entity_S* self, struct Entity_S *other, EntityTypeCollide type);		/**<Function to call to attack*/
+	void (*move)(struct Entity_S* self);		/**<Function to call to move*/
 	void (*free)(struct Entity_S* self);		/**<Function to clean up any custom allocated data*/
 	void* data;									/**<For ad hoc addition data for the entity*/
+	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
+	int health;
+
+	
+	//
+
+
 }Entity;
 
 /**
@@ -79,6 +114,27 @@ void entity_system_draw();
 **/
 void entity_configure(Entity* self, SJson* json);
 
-//void entity_position_()
+
+void entity_bounds_update(Entity* self);
+
+/**
+* @brief run an attack function for an Entity
+* 
+* 
+*/
+void entity_attack(Entity* self);
+
+/**
+* @brief move function for an Entity
+* @param The entity itself
+*/
+void entity_move(Entity* self);
+
+
+/**
+* @brief Entity Collision System that allows it to check the type that collides with it, and if its correct typ destroy
+* @param The entity itself, the other entity.
+*/
+void entity_collision(Entity* self, Entity* other);
 
 #endif

@@ -47,3 +47,8 @@ void monster_update(Entity* self)
 	if (!self) return;
 	monster_move(self);
 }
+
+void monster_damage(Entity* self)
+{
+	
+}

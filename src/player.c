@@ -6,10 +6,13 @@
 
 #include "entity.h"
 #include "player.h"
+#include "magic.h"
 
 Entity* player_new_entity(GFC_Vector2D position)
 {
+	//gfc_input_init("config/my_input.cfg")
 	Entity *self;
+	//Pointer in data
 	self = entity_new();
 	if (!self)
 	{
@@ -20,17 +23,16 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->think = player_think;
 	self->update = player_update;
 	self->frame = 0;
+	self->free;
 	self->sprite = gf2d_sprite_load_all(
 		"images/players/wizardSprites/PNG/wizard/wizard_Idle3.png",
 		128,
 		128,
 		4,
 		0);
-	//Set ground for player (Center)
-	
-	//self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
-
-	//gf2d_draw_rect(self->bounds, GFC_COLOR_RED);
+	self->magicCooldown = 0;
+	self->lastAttackTime = 0;
+	self->collidedType = ETC_entity;
 	return self;
 }
 
@@ -38,42 +40,50 @@ void player_move(Entity *self)
 {
 	if (!self) return; 
 	
-	gfc_vector2d_add(self->position, self->velocity, self->position);
-	//slog("Position is: %f", self->position);
+	//gfc_vector2d_add(self->position, self->velocity, self->position);
 
 
 }
 
 void player_think(Entity* self)
 {
+
 	if (!self) return;
 	//GFC_Vector2D velocity;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
-	if (keys[SDL_SCANCODE_D])
+	if (keys[SDL_SCANCODE_D])		//gfc_input_command_down("right")
 	{
-		self->velocity = gfc_vector2d(1.0f,0.0f);
+		self->velocity.x = 3;
 		//slog("Clicked D");
 	}
 	else if (keys[SDL_SCANCODE_A])
 	{
-		self->velocity = gfc_vector2d(-1.0f, 0.0f);
-		//slog("Clicked D");
+		self->velocity.x = -3;
 	}
-	else if (keys[SDL_SCANCODE_W])
+	else
 	{
-		self->velocity = gfc_vector2d(0.0f, -1.0f);
+		self->velocity.x = 0;
+	}
+	if (keys[SDL_SCANCODE_W])
+	{
+		self->velocity.y = -3;
 		//slog("Clicked D");
 	}
 	else if (keys[SDL_SCANCODE_S])
 	{
-		self->velocity = gfc_vector2d(0.0f, 1.0f);
+		self->velocity.y = 3;
 		//slog("Clicked D");
 	}
 	else
 	{
-		self->velocity = gfc_vector2d(0.0f, 0.0f);
+		self->velocity.y = 0;
 	}
 
+
+	//if (keys[SDL_SCANCODE_R])
+	//{
+	//	self->velocity = gfc_vector2d(1.0f, 0.f);
+	//}
 
 
 	
@@ -82,10 +92,51 @@ void player_think(Entity* self)
 void player_update(Entity* self)
 {
 	if (!self) return;
-	player_move(self);
 	self->frame += 0.05f;
 	//slog("Frame is: %f", self->frame);
 	if (self->frame >= 4) self->frame = 0;
 	self->ground = gfc_vector2d(self->position.x + (128 / 2), self->position.y + 128);
 	self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
+	player_attack(self);
+
 }
+
+void player_attack(Entity* self)
+{
+	if (!self) return;
+
+	const Uint8* keys = SDL_GetKeyboardState(NULL);
+	Uint32 currentTime = SDL_GetTicks(); // Get current time in milliseconds
+
+	if (currentTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
+		self->magicCooldown = 0;
+	}
+
+	if (keys[SDL_SCANCODE_Q] && (self->magicCooldown == 0))
+	{
+
+			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+
+			//spell->acceleration = gfc_vector2d(0.1f, 0.f);
+			//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
+
+
+			spell_move(spell);
+			self->magicCooldown = 3;
+			self->lastAttackTime = currentTime;
+	}
+
+}
+
+
+//Void player free
+/*
+* make PLayerEntityData
+IF !self or !self->data
+data = self->data
+gf2d_sprite_free(data->profilepicture)
+//other cleanup
+free(self->data)
+free(data)
+self->data =NULL
+*/
