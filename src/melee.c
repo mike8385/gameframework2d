@@ -33,10 +33,10 @@ Entity* melee_new_entity(GFC_Vector2D position)
 	return melee;
 }
 
-void melee_move(Entity* self)
+void melee_move(Entity* self, Entity* other)
 {
 	if (!self) return;
-	self->velocity = gfc_vector2d(5.0f, 0.f);
+	//self->velocity = gfc_vector2d(5.0f, 0.f);
 	//Uint32 currentTimeAttack = SDL_GetTicks(); // Get current time in milliseconds
 
 	//if (currentTimeAttack - self->lastAttackTimeMelee <= 2000) { // 3000 ms = 3 seconds
@@ -44,6 +44,8 @@ void melee_move(Entity* self)
 //	}
 
 //	self->lastAttackTime = currentTimeAttack;
+	self->position = other->position;
+
 
 
 }
@@ -55,6 +57,7 @@ void melee_think(Entity* self)
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	melee_attack(self);
 	melee_collision(self);
+
 
 
 }

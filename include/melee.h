@@ -9,7 +9,7 @@
 
 Entity* melee_new_entity(GFC_Vector2D position);
 
-void melee_move(Entity* self);
+void melee_move(Entity* self, Entity* other);
 
 void melee_think(Entity* self);
 
