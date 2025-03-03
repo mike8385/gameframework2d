@@ -153,6 +153,22 @@ void player_attack(Entity* self)
 		self->lastAttackTimeMelee = currentTime2;
 	}
 
+	if (keys[SDL_SCANCODE_X] && (self->meleeCooldown == 0))
+	{	
+
+		Entity* melee = melee_new_entity(gfc_vector2d(self->position.x + self->bounds.w + 3, self->position.y));
+		//spell->position = gfc_vector2d(spell->position.x + 3, self->position.y);
+
+		//spell->acceleration = gfc_vector2d(0.1f, 0.f);
+		//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
+
+
+		melee_move(melee);
+		self->meleeCooldown = 3;
+		self->lastAttackTimeMelee = currentTime2;
+		
+	}
+
 
 }
 

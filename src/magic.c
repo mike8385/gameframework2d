@@ -4,10 +4,8 @@
 #include "gfc_shape.h"
 #include "gf2d_draw.h"
 
-#include "entity.h"
 #include "player.h"
 #include "magic.h"
-#include "world.h"
 
 Entity* spell_new_entity(GFC_Vector2D position)
 {
@@ -31,6 +29,7 @@ Entity* spell_new_entity(GFC_Vector2D position)
 	spell->update = spell_update;
 	spell->think = spell_think;
 	spell->collidedType = ETC_magic;
+	spell->collision = spell_collision;
 	return spell;
 }
 
@@ -48,6 +47,7 @@ void spell_think(Entity* self)
 	//GFC_Vector2D velocity;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	spell_attack(self);
+	spell_collision(self);
 
 
 
@@ -64,6 +64,7 @@ void spell_update(Entity* self)
 	self->bounds = gfc_rect(self->position.x, self->position.y, 50, 50);
 
 	spell_world_collision(self);
+	//spell_collision(self);
 }
 
 void spell_attack(Entity* self)
@@ -83,5 +84,28 @@ void spell_world_collision(Entity* self)
 
 		entity_free(self);
 
+	}
+}
+
+void spell_collision(Entity* self)
+{
+	if (!self) return;
+
+	int i;
+	GFC_List* list = entity_collide_all(self);
+	if (!gfc_list_count(list))
+	{
+			gfc_list_delete(list); return;
+	}
+	for (i = 0; i < gfc_list_count(list); ++i)
+	{
+		Entity* other = (Entity*)gfc_list_nth(list, i);
+
+		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster))
+		{
+			entity_free(self);
+			//entity_damage(other);
+			entity_free(other);
+		}
 	}
 }

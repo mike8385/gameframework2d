@@ -48,7 +48,6 @@ typedef struct Entity_S
 	Uint32					lastAttackTimeMelee;
 	float					meleeCooldown;
 	Uint32					TTL;
-	Uint32					currentTime;
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/
