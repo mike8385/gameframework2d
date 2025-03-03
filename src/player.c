@@ -7,6 +7,7 @@
 #include "entity.h"
 #include "player.h"
 #include "magic.h"
+#include "melee.h"
 
 Entity* player_new_entity(GFC_Vector2D position)
 {
@@ -31,8 +32,12 @@ Entity* player_new_entity(GFC_Vector2D position)
 		4,
 		0);
 	self->magicCooldown = 0;
+	self->meleeCooldown = 0;
 	self->lastAttackTime = 0;
+	self->lastAttackTimeMelee = 0;
 	self->collidedType = ETC_entity;
+	self->health = 100;
+
 	return self;
 }
 
@@ -107,9 +112,14 @@ void player_attack(Entity* self)
 
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	Uint32 currentTime = SDL_GetTicks(); // Get current time in milliseconds
+	Uint32 currentTime2 = SDL_GetTicks(); // Get current time in milliseconds
 
 	if (currentTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
 		self->magicCooldown = 0;
+	}
+
+	if (currentTime2 - self->lastAttackTimeMelee >= 1000) { // 3000 ms = 3 seconds
+		self->meleeCooldown = 0;
 	}
 
 	if (keys[SDL_SCANCODE_Q] && (self->magicCooldown == 0))
@@ -125,6 +135,24 @@ void player_attack(Entity* self)
 			self->magicCooldown = 3;
 			self->lastAttackTime = currentTime;
 	}
+
+	if (keys[SDL_SCANCODE_X] && (self->meleeCooldown == 0))
+	{	
+
+		float playerOffsetX;
+
+		Entity* melee = melee_new_entity(gfc_vector2d(self->position.x + self->bounds.w + 3, self->position.y));
+		//spell->position = gfc_vector2d(spell->position.x + 3, self->position.y);
+
+		//spell->acceleration = gfc_vector2d(0.1f, 0.f);
+		//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
+
+
+		melee_move(melee);
+		self->meleeCooldown = 3;
+		self->lastAttackTimeMelee = currentTime2;
+	}
+
 
 }
 

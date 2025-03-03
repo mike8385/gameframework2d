@@ -45,14 +45,19 @@ typedef struct Entity_S
 	EntityTypeCollide		collidedType;
 	float					magicCooldown;
 	Uint32					lastAttackTime;
+	Uint32					lastAttackTimeMelee;
+	float					meleeCooldown;
+	Uint32					TTL;
+	Uint32					currentTime;
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/
 	void (*update)(struct Entity_S* self);		/**<Function to call to execute those decisions*/
 	void (*attack)(struct Entity_S* self);		/**<Function to call to attack*/
-	void (*damage)(struct Entity_S* self, struct Entity_S *other, EntityTypeCollide type);		/**<Function to call to attack*/
+	void (*damage)(struct Entity_S* self, struct Entity_S *other, int damage);		/**<Function to call damage*/
 	void (*move)(struct Entity_S* self);		/**<Function to call to move*/
 	void (*free)(struct Entity_S* self);		/**<Function to clean up any custom allocated data*/
+	void (*collision)(struct Entity_S* self);		/**<Function to call damage*/
 	void* data;									/**<For ad hoc addition data for the entity*/
 	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
 	int health;
@@ -114,7 +119,10 @@ void entity_system_draw();
 **/
 void entity_configure(Entity* self, SJson* json);
 
-
+/*
+* @brief Check the bounds of an entity and not allow it to leave the screen/world space
+*@param the entity itself
+**/
 void entity_bounds_update(Entity* self);
 
 /**
@@ -135,6 +143,19 @@ void entity_move(Entity* self);
 * @brief Entity Collision System that allows it to check the type that collides with it, and if its correct typ destroy
 * @param The entity itself, the other entity.
 */
-void entity_collision(Entity* self, Entity* other);
+GFC_List* entity_collide_all(Entity* self);
+
+/**
+* @brief Entity Collision check to see if the two entities collide
+* @param The entity itself, the other entity.
+* @return true or false (1 or 0)
+*/
+Uint8 entity_collision_check(Entity* self, Entity* other);
+
+/**
+* @brief What to do when collision happens
+* @param self
+*/
+void collision(Entity* self);
 
 #endif
