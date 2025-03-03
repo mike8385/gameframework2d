@@ -22,6 +22,7 @@ Entity* monster_new_entity(GFC_Vector2D position)
 		128,
 		16,
 		0);
+	self->collidedType = ETC_monster;
 }
 
 void monster_move(Entity* self)
@@ -38,6 +39,7 @@ void monster_think(Entity* self)
 {
 	if (!self) return;
 	//GFC_Vector2D velocity;
+	self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
 
 
 }

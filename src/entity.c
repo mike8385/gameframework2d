@@ -278,10 +278,58 @@ void entity_system_move()
 }
 
 
-void entity_collision()
+
+//Checks if the two entities collide
+Uint8 entity_collision_check(Entity* self, Entity* other)//, EntityTypeCollide* type)
+{
+	if (!self) return;
+	if (!other) return;
+	if (gfc_rect_overlap(self->bounds, other->bounds))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+/*
+* @brief Check which entites collide with self. If so, check the types and do whatever
+* @return NULL if out of entities, or a blank entity otherwise
+*/
+GFC_List* entity_collide_all(Entity* self)
 {
 
+	if (!self) return;
+	int i;
+	GFC_List* entities;
+	EntityTypeCollide selfType = self->collidedType;
+
+	entities = gfc_list_new();
+	for (i = 0; i < entity_system.entity_max; ++i)
+	{
+		if (!entity_system.entity_list[i]._inuse) continue;	//Skip any active entities
+		if (self == &entity_system.entity_list[i]) continue;	//Skip any active entities
+		if (entity_collision_check(self, &entity_system.entity_list[i]))
+		{
+			gfc_list_append(entities, &entity_system.entity_list[i]);
+		}
+	}
+	if (!gfc_list_count(entities))
+	{
+		gfc_list_delete(entities); return;
+	}
+	return entities;
 }
+
+void collision(Entity* self)
+{
+	if (!self) return;
+
+	if (self->collision)self->collision(self);
+
+}
+
+
+
 
 
 
