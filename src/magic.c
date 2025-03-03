@@ -50,6 +50,7 @@ void spell_think(Entity* self)
 	spell_attack(self);
 
 
+
 }
 
 void spell_update(Entity* self)
