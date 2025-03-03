@@ -5,54 +5,61 @@
 #include "gf2d_draw.h"
 
 #include "player.h"
-#include "magic.h"
+#include "melee.h"
 
-Entity* spell_new_entity(GFC_Vector2D position)
+Entity* melee_new_entity(GFC_Vector2D position)
 {
 
-	Entity* spell;
-	spell = entity_new();
-	if (!spell)
+	Entity* melee;
+	melee = entity_new();
+	if (!melee)
 	{
-		slog("failed to spawn a spell entity");
+		slog("failed to spawn a melee entity");
 	}
-	gfc_vector2d_copy(spell->position, position);
+	gfc_vector2d_copy(melee->position, position);
 
-	spell->sprite = gf2d_sprite_load_all(
+	melee->sprite = gf2d_sprite_load_all(
 		"images/players/wizardSprites/PNG/wizard/wizard_ball.png",
 		50,
 		50,
 		1,
 		0);
-	//spell->position = gfc_vector2d(spell->position.x + 3, self->position.y);
-	spell->bounds = gfc_rect(50, 50, 50, 50);
-	spell->update = spell_update;
-	spell->think = spell_think;
-	spell->collidedType = ETC_magic;
-	spell->collision = spell_collision;
-	return spell;
+	//melee->position = gfc_vector2d(melee->position.x + 3, self->position.y);
+	melee->bounds = gfc_rect(50, 50, 50, 50);
+	melee->update = melee_update;
+	melee->think = melee_think;
+	melee->collidedType = ETC_magic;
+	melee->collision = melee_collision;
+	return melee;
 }
 
-void spell_move(Entity* self)
+void melee_move(Entity* self)
 {
 	if (!self) return;
 	self->velocity = gfc_vector2d(5.0f, 0.f);
+	//Uint32 currentTimeAttack = SDL_GetTicks(); // Get current time in milliseconds
+
+	//if (currentTimeAttack - self->lastAttackTimeMelee <= 2000) { // 3000 ms = 3 seconds
+	//	slog("Hello");
+//	}
+
+//	self->lastAttackTime = currentTimeAttack;
 
 
 }
 
-void spell_think(Entity* self)
+void melee_think(Entity* self)
 {
 	if (!self) return;
 	//GFC_Vector2D velocity;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
-	spell_attack(self);
-	spell_collision(self);
+	melee_attack(self);
+	melee_collision(self);
 
 
 }
 
-void spell_update(Entity* self)
+void melee_update(Entity* self)
 {
 	if (!self) return;
 	//magic_move(self);
@@ -62,18 +69,18 @@ void spell_update(Entity* self)
 	self->ground = gfc_vector2d(self->position.x + (128 / 2), self->position.y + 128);
 	self->bounds = gfc_rect(self->position.x, self->position.y, 50, 50);
 
-	spell_world_collision(self);
-	//spell_collision(self);
+	melee_world_collision(self);
+	//melee_collision(self);
 }
 
-void spell_attack(Entity* self)
+void melee_attack(Entity* self)
 {
 	if (!self) return;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	//self->velocity = gfc_vector2d(1.0f, 0.0f);
 }
 
-void spell_world_collision(Entity* self)
+void melee_world_collision(Entity* self)
 {
 	GFC_Rect worldBounds = get_world_bounds();
 
@@ -86,7 +93,7 @@ void spell_world_collision(Entity* self)
 	}
 }
 
-void spell_collision(Entity* self)
+void melee_collision(Entity* self)
 {
 	if (!self) return;
 
@@ -94,7 +101,7 @@ void spell_collision(Entity* self)
 	GFC_List* list = entity_collide_all(self);
 	if (!gfc_list_count(list))
 	{
-			gfc_list_delete(list); return;
+		gfc_list_delete(list); return;
 	}
 	for (i = 0; i < gfc_list_count(list); ++i)
 	{

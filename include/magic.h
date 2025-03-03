@@ -5,6 +5,8 @@
 #include "simple_json.h"
 
 #include "world.h"
+#include "entity.h"
+
 
 Entity* spell_new_entity(GFC_Vector2D position);
 
@@ -17,5 +19,7 @@ void spell_update(Entity* self);
 void spell_attack(Entity* self);
 
 void spell_world_collision(Entity* self);
+
+void spell_collision(Entity* self);
 #pragma once
 #endif

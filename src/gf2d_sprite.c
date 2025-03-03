@@ -406,4 +406,6 @@ void gf2d_sprite_render(
     }
 }
 
+//Sprite *gf2d_sprite_from_surface(const char *name, SDL_Surface)
+
 /*eol@eof*/
