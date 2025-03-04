@@ -47,6 +47,8 @@ typedef struct Entity_S
 	Uint32					lastAttackTime;
 	Uint32					lastAttackTimeMelee;
 	float					meleeCooldown;
+	Uint32					worldTime;
+
 	Uint32					TTL;
 
 

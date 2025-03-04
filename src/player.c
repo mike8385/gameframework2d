@@ -37,6 +37,7 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->lastAttackTimeMelee = 0;
 	self->collidedType = ETC_entity;
 	self->health = 100;
+	self->worldTime = SDL_GetTicks();
 
 	return self;
 }
@@ -103,6 +104,7 @@ void player_update(Entity* self)
 	self->ground = gfc_vector2d(self->position.x + (128 / 2), self->position.y + 128);
 	self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
 	player_attack(self);
+	self->worldTime = SDL_GetTicks();
 
 }
 
@@ -114,11 +116,11 @@ void player_attack(Entity* self)
 	Uint32 currentTime = SDL_GetTicks(); // Get current time in milliseconds
 	Uint32 currentTime2 = SDL_GetTicks(); // Get current time in milliseconds
 
-	if (currentTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
+	if (self->worldTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
 		self->magicCooldown = 0;
 	}
 
-	if (currentTime2 - self->lastAttackTimeMelee >= 1000) { // 3000 ms = 3 seconds
+	if (self->worldTime - self->lastAttackTimeMelee >= 1000) { // 3000 ms = 3 seconds
 		self->meleeCooldown = 0;
 	}
 
@@ -133,7 +135,7 @@ void player_attack(Entity* self)
 
 			spell_move(spell);
 			self->magicCooldown = 3;
-			self->lastAttackTime = currentTime;
+			self->lastAttackTime = self->worldTime;
 	}
 
 	if (keys[SDL_SCANCODE_X] && (self->meleeCooldown == 0))
@@ -148,7 +150,7 @@ void player_attack(Entity* self)
 
 		melee_move(melee);
 		self->meleeCooldown = 3;
-		self->lastAttackTimeMelee = currentTime2;
+		self->lastAttackTimeMelee = self->worldTime;
 		
 	}
 
