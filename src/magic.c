@@ -30,6 +30,7 @@ Entity* spell_new_entity(GFC_Vector2D position)
 	spell->think = spell_think;
 	spell->collidedType = ETC_magic;
 	spell->collision = spell_collision;
+	spell->damageDelt = 10;
 	return spell;
 }
 
@@ -37,6 +38,11 @@ void spell_move(Entity* self)
 {
 	if (!self) return;
 	self->velocity = gfc_vector2d(5.0f, 0.f);
+	if (self->collidedType == ETC_monster_spell)
+	{
+		self->velocity = gfc_vector2d(-5.0f, 0.f);
+
+	}
 
 
 }
@@ -106,6 +112,13 @@ void spell_collision(Entity* self)
 			entity_free(self);
 			//entity_damage(other);
 			entity_free(other);
+		}
+
+		if ((self->collidedType == ETC_monster_spell) && (other->collidedType == ETC_entity))
+		{
+			entity_free(self);
+			entity_damage(self, other);
+			//entity_free(other);
 		}
 	}
 }

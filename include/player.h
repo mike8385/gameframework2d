@@ -31,7 +31,10 @@ void player_update(Entity *self);
 
 void player_attack(Entity* self);
 
+GFC_Rect get_player_bounds();
 
+
+GFC_Vector2D get_player_position();
 
 
 #endif

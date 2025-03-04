@@ -5,6 +5,7 @@
 #include "entity.h"
 
 
+
 /**
 * @brief spawn a new monster entity
 * @param position where to spawn it
@@ -31,6 +32,14 @@ void monster_update(Entity* self);
 
 
 void monster_damage(Entity* self);
+
+
+void monster_track_player(Entity* self);
+
+
+Uint8 monster_see_player(Entity* self);
+
+void monster_attack(Entity* self);
 
 
 #endif

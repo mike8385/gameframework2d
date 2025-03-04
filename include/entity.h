@@ -28,6 +28,7 @@ typedef enum
 	ETC_other = 3,
 	ETC_magic = 4,
 	ETC_monster = 5,
+	ETC_monster_spell = 6,
 	ETC_MAX = 15
 } EntityTypeCollide;
 
@@ -48,6 +49,12 @@ typedef struct Entity_S
 	Uint32					lastAttackTimeMelee;
 	float					meleeCooldown;
 	Uint32					TTL;
+	Uint32					lastJumpTime;
+
+	float jumpCooldown;
+	int health;
+	int damageDelt;
+
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/
@@ -59,7 +66,7 @@ typedef struct Entity_S
 	void (*collision)(struct Entity_S* self);		/**<Function to call damage*/
 	void* data;									/**<For ad hoc addition data for the entity*/
 	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
-	int health;
+
 
 	
 	//
@@ -156,5 +163,7 @@ Uint8 entity_collision_check(Entity* self, Entity* other);
 * @param self
 */
 void collision(Entity* self);
+
+void entity_damage(Entity* self, Entity* other);
 
 #endif

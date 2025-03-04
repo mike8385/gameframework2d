@@ -153,6 +153,7 @@ void entity_system_think()
 void entity_update(Entity* self)
 {
 	if (!self) return;
+
 	
 	if (self->update)self->update(self);
 }
@@ -330,7 +331,14 @@ void collision(Entity* self)
 
 
 
-
+void entity_damage(Entity* self, Entity* other)
+{
+	other->health = other->health - self->damageDelt;
+	if (other->health == 0)
+	{
+		entity_free(other);
+	}
+}
 
 
 //Uint8 entity collision check with self and other

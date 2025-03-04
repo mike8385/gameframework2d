@@ -9,6 +9,14 @@
 #include "magic.h"
 #include "melee.h"
 
+
+typedef struct {
+	Entity* playerData;
+
+}PlayerSystem;
+
+static PlayerSystem player_system = { 0 }; /**<Initalize a LOCAL global entity manager*/
+
 Entity* player_new_entity(GFC_Vector2D position)
 {
 	//gfc_input_init("config/my_input.cfg")
@@ -35,8 +43,16 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->meleeCooldown = 0;
 	self->lastAttackTime = 0;
 	self->lastAttackTimeMelee = 0;
+	self->lastJumpTime = 0;
+	self->jumpCooldown = 0;
 	self->collidedType = ETC_entity;
 	self->health = 100;
+
+	self->position = position;
+	self->damage = 10;
+
+	player_system.playerData = self;
+
 
 	return self;
 }
@@ -59,7 +75,18 @@ void player_think(Entity* self)
 	if (keys[SDL_SCANCODE_D])		//gfc_input_command_down("right")
 	{
 		self->velocity.x = 3;
+		//self->sprite =gf2d_sprite_load_all(
+		//	"images/players/wizardSprites/PNG/wizard/wizard_run.png",
+		//	128,
+		//	128,
+		//	4,
+		//	0);
+		//self->sprite = gf2d_sprite_load_image("images/players/wizardSprites/PNG/wizard/wizard_run.png");
+		//self->sprite->frame_w = 128;
+		//self->sprite->frame_h = 128;
+
 		//slog("Clicked D");
+
 	}
 	else if (keys[SDL_SCANCODE_A])
 	{
@@ -82,15 +109,43 @@ void player_think(Entity* self)
 	else
 	{
 		self->velocity.y = 0;
+		//self->sprite = gf2d_sprite_load_all(
+		//	"images/players/wizardSprites/PNG/wizard/wizard_run.png",
+		//	128,
+		//	128,
+		//	4,
+		//	0);
+		//self->sprite = gf2d_sprite_load_image("images/players/wizardSprites/PNG/wizard/wizard_run.png");
+		//self->sprite->frame_w = 128;
+		//self->sprite->frame_h = 128;
+
+
 	}
 
 
-	//if (keys[SDL_SCANCODE_R])
-	//{
-	//	self->velocity = gfc_vector2d(1.0f, 0.f);
-	//}
+	if (keys[SDL_SCANCODE_SPACE])
+	{
+		Uint8 currentTime = SDL_GetTicks();
+
+		if (currentTime - self->lastJumpTime >= 1000)
+		{ // 3000 ms = 3 seconds
+			self->jumpCooldown = 0;
+
+		}
 
 
+		if (self->jumpCooldown == 0)
+		{
+			slog("test");
+			self->velocity.y = -3;
+			self->acceleration.y = 4;
+			self->lastJumpTime = 3;
+		}
+		else
+		{
+			self->velocity.y = -3;
+		}
+	}
 	
 }
 
@@ -153,6 +208,8 @@ void player_attack(Entity* self)
 	}
 
 
+
+
 }
 
 
@@ -167,3 +224,15 @@ free(self->data)
 free(data)
 self->data =NULL
 */
+
+GFC_Rect get_player_bounds()
+{
+	return player_system.playerData->bounds;
+}
+
+GFC_Vector2D get_player_position()
+{
+	return player_system.playerData->position;
+}
+
+
