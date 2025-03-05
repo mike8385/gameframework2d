@@ -146,7 +146,7 @@ void player_think(Entity* self)
 			self->velocity.y = -3;
 		}
 	}
-	
+
 }
 
 void player_update(Entity* self)
@@ -180,19 +180,19 @@ void player_attack(Entity* self)
 	if (keys[SDL_SCANCODE_Q] && (self->magicCooldown == 0))
 	{
 
-			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
 
-			//spell->acceleration = gfc_vector2d(0.1f, 0.f);
-			//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
+		//spell->acceleration = gfc_vector2d(0.1f, 0.f);
+		//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
 
 
-			spell_move(spell);
-			self->magicCooldown = 3;
-			self->lastAttackTime = currentTime;
+		spell_move(spell);
+		self->magicCooldown = 3;
+		self->lastAttackTime = currentTime;
 	}
 
 	if (keys[SDL_SCANCODE_X] && (self->meleeCooldown == 0))
-	{	
+	{
 
 
 		Entity* melee = melee_new_entity(gfc_vector2d(self->position.x + self->bounds.w + 3, self->position.y));
@@ -224,6 +224,13 @@ free(self->data)
 free(data)
 self->data =NULL
 */
+
+void player_free(Entity* self)
+{
+	if ((!self) || (!self->data)) return;
+	Entity* data = self->data;
+	
+}
 
 GFC_Rect get_player_bounds()
 {
