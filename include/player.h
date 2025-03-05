@@ -36,6 +36,8 @@ GFC_Rect get_player_bounds();
 
 GFC_Vector2D get_player_position();
 
+void player_free(Entity* self);
+
 
 #endif
 #pragma once

@@ -229,6 +229,13 @@ void player_free(Entity* self)
 {
 	if ((!self) || (!self->data)) return;
 	Entity* data = self->data;
+	//gf2d_sprite_free(data->)
+	gf2d_sprite_free(data->sprite);
+	free(self->data);
+	free(data);
+	self->data = NULL;
+	free(self);
+
 	
 }
 
