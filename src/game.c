@@ -5,10 +5,13 @@
 #include "gf2d_sprite.h"
 #include "gf2d_draw.h"
 
+#include "camera.h"
 #include "entity.h"
 #include "player.h"
 #include "monster.h"
+
 #include "world.h"
+#include "status.h"
 
 Uint8 _DRAWBOUNDS_ = 0;
 
@@ -45,7 +48,9 @@ int main(int argc, char * argv[])
     gf2d_graphics_set_frame_delay(16);
     gf2d_sprite_init(1024);
     entity_system_init(1024);
+    effect_system_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
+    camera_set_size(gfc_vector2d(1200,720));
     
     /*demo setup*/
     sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
@@ -54,6 +59,7 @@ int main(int argc, char * argv[])
     player = player_new_entity(position);
     monster = monster_new_entity(monsterposition);
     world = world_test_new();
+    world_setup_camera(world);
 
     slog("press [escape] to quit");
     /*main game loop*/
@@ -70,6 +76,7 @@ int main(int argc, char * argv[])
         entity_system_update();
         entity_system_move();
         entity_bounds_update(player);
+
         
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame

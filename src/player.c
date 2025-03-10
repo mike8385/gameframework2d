@@ -4,6 +4,7 @@
 #include "gfc_shape.h"
 #include "gf2d_draw.h"
 
+#include "camera.h"
 #include "entity.h"
 #include "player.h"
 #include "magic.h"
@@ -32,8 +33,10 @@ Entity* player_new_entity(GFC_Vector2D position)
 		4,
 		0);
 	self->magicCooldown = 0;
+	self->burstMagicCooldown = 0;
 	self->meleeCooldown = 0;
 	self->lastAttackTime = 0;
+	self->lastAttackTimeBurst = 0;
 	self->lastAttackTimeMelee = 0;
 	self->collidedType = ETC_entity;
 	self->health = 100;
@@ -106,6 +109,7 @@ void player_update(Entity* self)
 	player_attack(self);
 	self->worldTime = SDL_GetTicks();
 
+	camera_center_on(self->position);
 }
 
 void player_attack(Entity* self)
@@ -120,14 +124,22 @@ void player_attack(Entity* self)
 		self->magicCooldown = 0;
 	}
 
+	if (self->worldTime - self->lastAttackTimeBurst >= 5000) { // 5000 ms = 5 seconds
+		self->burstMagicCooldown = 0;
+	}
+
 	if (self->worldTime - self->lastAttackTimeMelee >= 1000) { // 3000 ms = 3 seconds
 		self->meleeCooldown = 0;
 	}
+	if (self->worldTime - self->lastAttackTimeWall >= 8000) { // 3000 ms = 3 seconds
+		self->wallMagicCooldown = 0;
+	}
+
 
 	if (keys[SDL_SCANCODE_Q] && (self->magicCooldown == 0))
 	{
 
-			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x, self->position.y));
 
 			//spell->acceleration = gfc_vector2d(0.1f, 0.f);
 			//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
@@ -152,6 +164,51 @@ void player_attack(Entity* self)
 		self->meleeCooldown = 3;
 		self->lastAttackTimeMelee = self->worldTime;
 		
+	}
+
+	if (keys[SDL_SCANCODE_Z] && (self->magicCooldown == 0))
+	{
+
+		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+		spell->magicType = MT_fire;
+
+
+
+		spell_move(spell);
+		self->magicCooldown = 3;
+		self->lastAttackTime = self->worldTime;
+	}
+
+	if (keys[SDL_SCANCODE_R] && (self->burstMagicCooldown == 0))
+	{
+
+		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+		spell->worldTime = self->worldTime;
+		spell->magicType = MT_rapid;
+		spell_move(spell);
+
+		self->burstMagicCooldown = 3;
+		self->lastAttackTimeBurst = self->worldTime;
+	}
+
+	if (keys[SDL_SCANCODE_C] && (self->wallMagicCooldown == 0))
+	{
+
+		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+		spell->worldTime = self->worldTime;
+		spell->magicType = MT_wall;
+		spell_move(spell);
+		Entity* spell2 = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y-50));
+		spell2->worldTime = self->worldTime;
+		spell2->magicType = MT_wall;
+		spell_move(spell2);
+		Entity* spell3 = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y+50));
+		spell3->worldTime = self->worldTime;
+		spell3->magicType = MT_wall;
+		spell_move(spell3);
+
+		self->wallMagicCooldown = 10;
+		self->lastAttackTimeWall = self->worldTime;
 	}
 
 

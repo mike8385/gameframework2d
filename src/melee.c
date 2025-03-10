@@ -30,6 +30,9 @@ Entity* melee_new_entity(GFC_Vector2D position)
 	melee->think = melee_think;
 	melee->collidedType = ETC_magic;
 	melee->collision = melee_collision;
+	melee->TTL = 20;
+	melee->spawnTime = SDL_GetTicks();  // Set the current time
+
 	return melee;
 }
 
@@ -71,6 +74,9 @@ void melee_update(Entity* self)
 
 	melee_world_collision(self);
 	//melee_collision(self);
+	// In the game loop or entity update function
+	update_entity_lifetime(self);  // Check if the melee entity has expired
+
 }
 
 void melee_attack(Entity* self)
@@ -115,3 +121,4 @@ void melee_collision(Entity* self)
 		}
 	}
 }
+

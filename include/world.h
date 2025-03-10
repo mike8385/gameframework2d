@@ -8,11 +8,13 @@
 typedef struct
 {
 	Sprite*			background;				/**<Background image for the world*/
+	Sprite*			tileLayer;
 	GFC_Rect		bounds;					/**<Bounds for the map*/
 	Sprite*			tileSet;				/**Sprite containing tiles for the world<*/
 	Uint8*			tileMap;				/**<The tiles that make up the world*/
 	Uint32			tileHeight;				/**<How many tiles tall the map is*/
 	Uint32			tileWidth;				/**<How many tiles long the map is*/
+	Uint32			worldTime;
 }World;
 
 /**
@@ -45,6 +47,9 @@ void* world_draw(World* world);
 */
 GFC_Rect get_world_bounds();
 
+void world_setup_camera(World* world);
+
+Uint32 get_world_time();
 
 #endif
 
