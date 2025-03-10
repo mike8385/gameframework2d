@@ -10,6 +10,15 @@
 #include "magic.h"
 #include "melee.h"
 
+
+typedef struct {
+	Entity* playerData;
+	Stats* playerStats;
+
+}PlayerSystem;
+
+static PlayerSystem player_system = { 0 }; /**<Initalize a LOCAL global entity manager*/
+
 Entity* player_new_entity(GFC_Vector2D position)
 {
 	//gfc_input_init("config/my_input.cfg")
@@ -38,10 +47,29 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->lastAttackTime = 0;
 	self->lastAttackTimeBurst = 0;
 	self->lastAttackTimeMelee = 0;
+	self->lastJumpTime = 0;
+	self->jumpCooldown = 0;
 	self->collidedType = ETC_entity;
 	self->health = 100;
 	self->worldTime = SDL_GetTicks();
 
+	self->position = position;
+	self->damage = 10;
+
+	Stats* data;
+	data = gfc_allocate_array(sizeof(Stats), 1);
+	if (data)
+	{
+		data->strength = 1;
+		data->magic = 1;
+		data->speed = 1;
+		data->defense = 1;
+		data->EXP = 0;
+	}
+	self->data = data;
+
+	player_system.playerData = self;
+	player_system.playerStats = self->data;
 	return self;
 }
 
@@ -56,6 +84,7 @@ void player_move(Entity *self)
 
 void player_think(Entity* self)
 {
+	Stats* data;
 
 	if (!self) return;
 	//GFC_Vector2D velocity;
@@ -63,11 +92,31 @@ void player_think(Entity* self)
 	if (keys[SDL_SCANCODE_D])		//gfc_input_command_down("right")
 	{
 		self->velocity.x = 3;
+		//self->sprite =gf2d_sprite_load_all(
+		//	"images/players/wizardSprites/PNG/wizard/wizard_run.png",
+		//	128,
+		//	128,
+		//	4,
+		//	0);
+		//self->sprite = gf2d_sprite_load_image("images/players/wizardSprites/PNG/wizard/wizard_run.png");
+		//self->sprite->frame_w = 128;
+		//self->sprite->frame_h = 128;
+
 		//slog("Clicked D");
+
 	}
 	else if (keys[SDL_SCANCODE_A])
 	{
-		self->velocity.x = -3;
+		data = get_player_stats();
+		if (data->speed == 2)
+		{
+			self->velocity.x = -4;
+		}
+		else
+		{
+			self->velocity.x = -3;
+
+		}
 	}
 	else
 	{
@@ -86,16 +135,46 @@ void player_think(Entity* self)
 	else
 	{
 		self->velocity.y = 0;
+		//self->sprite = gf2d_sprite_load_all(
+		//	"images/players/wizardSprites/PNG/wizard/wizard_run.png",
+		//	128,
+		//	128,
+		//	4,
+		//	0);
+		//self->sprite = gf2d_sprite_load_image("images/players/wizardSprites/PNG/wizard/wizard_run.png");
+		//self->sprite->frame_w = 128;
+		//self->sprite->frame_h = 128;
+
+
 	}
 
 
-	//if (keys[SDL_SCANCODE_R])
-	//{
-	//	self->velocity = gfc_vector2d(1.0f, 0.f);
-	//}
+	if (keys[SDL_SCANCODE_SPACE])
+	{
+		Uint8 currentTime = SDL_GetTicks();
+
+		if (currentTime - self->lastJumpTime >= 1000)
+		{ // 3000 ms = 3 seconds
+			self->jumpCooldown = 0;
+
+		}
 
 
-	
+		if (self->jumpCooldown == 0)
+		{
+			slog("test");
+			self->velocity.y = -3;
+			self->acceleration.y = 4;
+			self->lastJumpTime = 3;
+		}
+		else
+		{
+			self->velocity.y = -3;
+		}
+	}
+
+	player_level_up(self);
+
 }
 
 void player_update(Entity* self)
@@ -119,6 +198,7 @@ void player_attack(Entity* self)
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	Uint32 currentTime = SDL_GetTicks(); // Get current time in milliseconds
 	Uint32 currentTime2 = SDL_GetTicks(); // Get current time in milliseconds
+	Stats* stats = get_player_stats();
 
 	if (self->worldTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
 		self->magicCooldown = 0;
@@ -141,8 +221,8 @@ void player_attack(Entity* self)
 
 			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x, self->position.y));
 
-			//spell->acceleration = gfc_vector2d(0.1f, 0.f);
-			//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
+		//spell->acceleration = gfc_vector2d(0.1f, 0.f);
+		//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
 
 
 			spell_move(spell);
@@ -151,7 +231,7 @@ void player_attack(Entity* self)
 	}
 
 	if (keys[SDL_SCANCODE_X] && (self->meleeCooldown == 0))
-	{	
+	{
 
 
 		Entity* melee = melee_new_entity(gfc_vector2d(self->position.x + self->bounds.w + 3, self->position.y));
@@ -180,7 +260,7 @@ void player_attack(Entity* self)
 		self->lastAttackTime = self->worldTime;
 	}
 
-	if (keys[SDL_SCANCODE_R] && (self->burstMagicCooldown == 0))
+	if (keys[SDL_SCANCODE_R] && (self->burstMagicCooldown == 0) && (stats->magic >=2 ))
 	{
 
 		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
@@ -212,7 +292,40 @@ void player_attack(Entity* self)
 		self->lastAttackTimeWall = self->worldTime;
 	}
 
+}
 
+void player_level_up(Entity* self)
+{
+	if (!self) return;
+
+	const Uint8* keys = SDL_GetKeyboardState(NULL);
+	Stats* stats;
+	stats = get_player_stats();
+	if (keys[SDL_SCANCODE_L])
+	{
+
+		slog("EXP: %d", stats->EXP);
+		if (stats->EXP == 1)
+		{
+			stats->speed += 1;
+			stats->EXP = 0;
+		}
+		slog("SPEED %d", stats->speed);
+
+	}
+
+	if (keys[SDL_SCANCODE_M])
+	{
+
+		slog("EXP: %d", stats->magic);
+		if (stats->EXP == 1)
+		{
+			stats->magic += 1;
+			stats->EXP = 0;
+		}
+		slog("SPEED %d", stats->magic);
+
+	}
 }
 
 
@@ -227,3 +340,34 @@ free(self->data)
 free(data)
 self->data =NULL
 */
+
+void player_free(Entity* self)
+{
+	if ((!self) || (!self->data)) return;
+	Entity* data = self->data;
+	//gf2d_sprite_free(data->)
+	gf2d_sprite_free(data->sprite);
+	free(self->data);
+	free(data);
+	self->data = NULL;
+	free(self);
+
+	
+}
+
+GFC_Rect get_player_bounds()
+{
+	return player_system.playerData->bounds;
+}
+
+GFC_Vector2D get_player_position()
+{
+	return player_system.playerData->position;
+}
+
+Stats* get_player_stats()
+{
+	return player_system.playerData->data;
+}
+
+

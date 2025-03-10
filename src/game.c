@@ -30,8 +30,8 @@ int main(int argc, char * argv[])
     GFC_Color mouseGFC_Color = gfc_color8(255,100,255,200);
     Entity* player;
     Entity* monster;
-    GFC_Vector2D position = gfc_vector2d(100.0f, 100.0f);
-    GFC_Vector2D monsterposition = gfc_vector2d(500.0f, 100.0f);
+    GFC_Vector2D position = gfc_vector2d(100.0f, 500.0f);
+    GFC_Vector2D monsterposition = gfc_vector2d(700.0f, 500.0f);
     GFC_Rect rectangle = gfc_rect(100, 100, 1000, 500);
     
     /*program initializtion*/
@@ -76,6 +76,9 @@ int main(int argc, char * argv[])
         entity_system_update();
         entity_system_move();
         entity_bounds_update(player);
+
+        entity_bounds_update(monster);
+
 
         
         gf2d_graphics_clear_screen();// clears drawing buffers

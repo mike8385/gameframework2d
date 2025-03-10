@@ -62,7 +62,6 @@ void melee_think(Entity* self)
 	melee_collision(self);
 
 
-
 }
 
 void melee_update(Entity* self)

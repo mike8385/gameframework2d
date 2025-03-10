@@ -84,11 +84,13 @@ void spell_move(Entity* self)
 		//}
 
 
+	
+
+
+
+
+
 	}
-
-
-
-
 
 
 }
@@ -147,7 +149,7 @@ void spell_collision(Entity* self)
 	GFC_List* list = entity_collide_all(self);
 	if (!gfc_list_count(list))
 	{
-			gfc_list_delete(list); return;
+		gfc_list_delete(list); return;
 	}
 	for (i = 0; i < gfc_list_count(list); ++i)
 	{
@@ -158,6 +160,8 @@ void spell_collision(Entity* self)
 			entity_free(self);
 			//entity_damage(other);
 			entity_free(other);
+			Stats* playerStats = get_player_stats();
+			playerStats->EXP += 1;
 		}
 		else if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster) && (self->magicType == MT_fire))
 		{
@@ -172,7 +176,7 @@ void spell_collision(Entity* self)
 			status_give_effect(other, effect);
 			//Make a file for statusEffects and call give status to other
 			//status_give_effect(other, )
-			
+
 		}
 	}
 }
@@ -180,5 +184,5 @@ void spell_collision(Entity* self)
 
 void spell_type(Entity* self)
 {
-	
+
 }

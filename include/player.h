@@ -5,6 +5,16 @@
 #include "entity.h"
 
 
+typedef struct S_stats
+{
+	Uint8	strength;
+	Uint8	magic;
+	Uint8	defense;
+	Uint8	speed;
+	Uint32	EXP;
+}Stats;
+
+
 /**
 * @brief spawn a new player entity
 * @param position where to spawn it
@@ -31,7 +41,17 @@ void player_update(Entity *self);
 
 void player_attack(Entity* self);
 
+GFC_Rect get_player_bounds();
 
+
+GFC_Vector2D get_player_position();
+
+void player_free(Entity* self);
+
+
+Stats* get_player_stats();
+
+void player_level_up(Entity* self);
 
 
 #endif

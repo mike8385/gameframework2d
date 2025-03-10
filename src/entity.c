@@ -163,6 +163,7 @@ void entity_system_think()
 void entity_update(Entity* self)
 {
 	if (!self) return;
+
 	
 	if (self->update)self->update(self);
 }
@@ -340,6 +341,7 @@ void collision(Entity* self)
 
 
 
+
 void update_entity_lifetime(Entity* self) {
 	if (!self) return;  // Make sure the entity is valid
 
@@ -348,6 +350,15 @@ void update_entity_lifetime(Entity* self) {
 		// Log and free the entity
 		slog("Entity expired and is being freed");
 		entity_free(self);  // Free the entity (delete it from memory)
+	}
+}
+
+void entity_damage(Entity* self, Entity* other)
+{
+	other->health = other->health - self->damageDelt;
+	if (other->health == 0)
+	{
+		entity_free(other);
 	}
 
 }
