@@ -10,6 +10,7 @@
 #include "gfc_shape.h"
 #include "world.h"
 
+
 //typedef enum
 //{
 //
@@ -19,6 +20,8 @@
 //{
 //
 //}EntityCollisionLayers;
+
+
 
 
 typedef enum
@@ -31,6 +34,17 @@ typedef enum
 	ETC_MAX = 15
 } EntityTypeCollide;
 
+typedef enum
+{
+	MT_magic = 1,
+	MT_fire = 2,
+	MT_rapid = 3,
+	MT_wall = 4,
+	MT_MAX = 5
+} MagicType;
+
+
+
 typedef struct Entity_S
 {
 	Uint8					_inuse;						/**<Memory management flag*/
@@ -38,16 +52,33 @@ typedef struct Entity_S
 	GFC_Rect				bounds;						/**<Entity Bounds*/
 	GFC_Vector2D			ground;
 	Sprite*					sprite;						/**<Graphical representation of entity*/
+	GFC_List				*sprites;
 	float					frame;						/**<for drawing the sprite*/
 	GFC_Vector2D			position;					/**<Were to draw it*/
 	GFC_Vector2D			velocity;					/**<how we are moving*/
 	GFC_Vector2D			acceleration;
 	EntityTypeCollide		collidedType;
+
+
 	float					magicCooldown;
+	float					fireMagicCooldown;
+	float					burstMagicCooldown;
+	float					wallMagicCooldown;
 	Uint32					lastAttackTime;
+	Uint32					lastAttackTimeBurst;
+	Uint32					lastAttackTimeWall;
+
+
+	//Code for melee handling
 	Uint32					lastAttackTimeMelee;
 	float					meleeCooldown;
+
+	Uint32					worldTime;
+	MagicType				magicType; /**<Type of magic thats gettting shot*/
+	//Effects					statusEffects;
+
 	Uint32					TTL;
+	Uint32					spawnTime;
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/
@@ -156,5 +187,9 @@ Uint8 entity_collision_check(Entity* self, Entity* other);
 * @param self
 */
 void collision(Entity* self);
+
+void update_entity_lifetime(Entity* self);
+
+
 
 #endif

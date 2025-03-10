@@ -68,6 +68,16 @@ void entity_system_init(Uint32 maxEnts)
 	atexit(entity_system_close);
 }
 
+
+void entity_json_use(const char* filename)
+{
+	if (!filename) return;
+	SJson json;
+	sj_load(filename);
+	//sj_load(JSON);
+
+}
+
 void entity_draw(Entity* self)
 {
 	if (!self) return;
@@ -330,7 +340,17 @@ void collision(Entity* self)
 
 
 
+void update_entity_lifetime(Entity* self) {
+	if (!self) return;  // Make sure the entity is valid
 
+	Uint32 currentTime = SDL_GetTicks();  // Get the current time
+	if (currentTime - self->spawnTime >= self->TTL) {  // If TTL expired
+		// Log and free the entity
+		slog("Entity expired and is being freed");
+		entity_free(self);  // Free the entity (delete it from memory)
+	}
+
+}
 
 
 //Uint8 entity collision check with self and other

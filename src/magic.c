@@ -6,6 +6,8 @@
 
 #include "player.h"
 #include "magic.h"
+#include "status.h"
+
 
 Entity* spell_new_entity(GFC_Vector2D position)
 {
@@ -30,13 +32,63 @@ Entity* spell_new_entity(GFC_Vector2D position)
 	spell->think = spell_think;
 	spell->collidedType = ETC_magic;
 	spell->collision = spell_collision;
+	spell->magicType = MT_magic;
 	return spell;
 }
 
 void spell_move(Entity* self)
 {
 	if (!self) return;
-	self->velocity = gfc_vector2d(5.0f, 0.f);
+
+	self->velocity = gfc_vector2d(5.0f, 0.f); //Default magic type
+
+	if (self->magicType == MT_fire)
+	{
+		self->velocity = gfc_vector2d(2.0f, 0.f); //Default magic type
+
+	}
+
+	if (self->magicType == MT_rapid)
+	{
+		self->velocity = gfc_vector2d(7.0f, 0.f); //Default magic type
+		//Uint32 currentTime = SDL_GetTicks();
+		if (self->worldTime - self->spawnTime >= 1050)
+		{
+			if (self->spawnTime + 1050 <= self->worldTime) // Ensures the delay only occurs once
+			{
+				Entity* spell2 = spell_new_entity(gfc_vector2d(self->position.x + 50 , self->position.y));
+				spell2->magicType = MT_rapid;
+				//spell_move(spell2);
+				spell2->velocity = gfc_vector2d(7.0f, 0.f); //Default magic type
+
+			}
+		}
+
+
+	}
+
+	if (self->magicType == MT_wall)
+	{
+		self->velocity = gfc_vector2d(4.0f, 0.f); //Default magic type
+		////Uint32 currentTime = SDL_GetTicks();
+		//if (self->worldTime - self->spawnTime >= 1050)
+		//{
+		//	if (self->spawnTime + 1050 <= self->worldTime) // Ensures the delay only occurs once
+		//	{
+		//		Entity* spell2 = spell_new_entity(gfc_vector2d(self->position.x + 50, self->position.y));
+		//		spell2->magicType = MT_rapid;
+		//		//spell_move(spell2);
+		//		spell2->velocity = gfc_vector2d(7.0f, 0.f); //Default magic type
+
+		//	}
+		//}
+
+
+	}
+
+
+
+
 
 
 }
@@ -101,11 +153,32 @@ void spell_collision(Entity* self)
 	{
 		Entity* other = (Entity*)gfc_list_nth(list, i);
 
-		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster))
+		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster) && (self->magicType == MT_magic))
 		{
 			entity_free(self);
 			//entity_damage(other);
 			entity_free(other);
 		}
+		else if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster) && (self->magicType == MT_fire))
+		{
+			Effects* effect = effect_new();  // Allocate a new effect instance
+			if (!effect) return;  // Avoid crash if allocation fails
+
+			effect->fireEffect = 1;
+			effect->TTL_fire = 4000;
+			effect->statusDamage = 10;
+			effect->statusStart = SDL_GetTicks();
+
+			status_give_effect(other, effect);
+			//Make a file for statusEffects and call give status to other
+			//status_give_effect(other, )
+			
+		}
 	}
+}
+
+
+void spell_type(Entity* self)
+{
+	
 }

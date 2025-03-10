@@ -1,6 +1,7 @@
 #include "simple_json.h"
 #include "simple_logger.h"
 
+#include "camera.h"
 
 #include "world.h"
 
@@ -70,6 +71,7 @@ World* world_new(Uint32 width, Uint32 height)
 	world->tileHeight = height;
 	world->tileWidth = width;
 	world->bounds = gfc_rect(0,0,width,height);
+	world->worldTime = SDL_GetTicks();
 
 
 	return world;
@@ -97,14 +99,15 @@ void world_free(World* world)
 void* world_draw(World* world)
 {
 	//slog("World Draw");
-
+	GFC_Vector2D offset;
 	int i, j;
 	int index;
 	int frame;
 	GFC_Vector2D position;
 	if (!world) return;
+	offset = camera_get_offset();
 
-	gf2d_sprite_draw_image(world->background, gfc_vector2d(0, 0));
+	gf2d_sprite_draw_image(world->background, offset);//gfc_vector2d(0, 0));
 	if (!world->tileSet)return;//Cant draw with no tiles
 	for (j = 0; j < world->tileWidth; j++)
 	{
@@ -134,3 +137,15 @@ GFC_Rect get_world_bounds()
 	return world_system.worldData->bounds;
 }
 
+void world_setup_camera(World* world)
+{
+	if (!world) return;
+	//if(!world->tileLayer)
+	camera_set_bounds(gfc_rect(0, 0, 50, 50));
+	camera_bounds_check();
+}
+
+Uint32 get_world_time()
+{
+	return world_system.worldData->worldTime;
+}
