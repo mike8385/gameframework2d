@@ -41,7 +41,7 @@ Entity* spell_new_entity(GFC_Vector2D position)
 void spell_move(Entity* self)
 {
 	if (!self) return;
-	slog("CollidedType: %d, MagicType: %d", self->collidedType, self->magicType);
+	//slog("CollidedType: %d, MagicType: %d", self->collidedType, self->magicType);
 
 	if ((self->collidedType == ETC_magic) && (self->magicType == MT_magic))
 	{

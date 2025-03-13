@@ -77,6 +77,7 @@ World* world_new(Uint32 width, Uint32 height)
 	world->tileWidth = width;
 	world->bounds = gfc_rect(0,0,width,height);
 	world->worldTime = SDL_GetTicks();
+	world->ground.y = height;
 
 	return world;
 
@@ -155,3 +156,8 @@ Uint32 get_world_time()
 	return world_system.worldData->worldTime;
 }
 
+GFC_Vector2D get_world_ground()
+{
+	return world_system.worldData->ground;
+
+}

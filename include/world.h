@@ -15,7 +15,7 @@ typedef struct
 	Uint32			tileHeight;				/**<How many tiles tall the map is*/
 	Uint32			tileWidth;				/**<How many tiles long the map is*/
 	Uint32			worldTime;
-	GFC_Rect		ground;
+	GFC_Vector2D		ground;
 }World;
 
 /**
@@ -51,6 +51,8 @@ GFC_Rect get_world_bounds();
 void world_setup_camera(World* world);
 
 Uint32 get_world_time();
+
+GFC_Vector2D get_world_ground();
 
 #endif
 

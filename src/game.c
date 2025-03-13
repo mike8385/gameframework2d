@@ -40,11 +40,11 @@ int main(int argc, char* argv[])
     Sprite* mouse;
     GFC_Color mouseGFC_Color = gfc_color8(255, 100, 255, 200);
     Entity* player;
-    //Entity* monster;
-    //Entity* fire_wizard;
-    //Entity* ice_wizard;
-    //Entity* fast_wizard;
-    //Entity* melee_wizard;
+    Entity* monster;
+    Entity* fire_wizard;
+    Entity* ice_wizard;
+    Entity* fast_wizard;
+    Entity* melee_wizard;
     GFC_Vector2D position = gfc_vector2d(100.0f, 500.0f);
     GFC_Vector2D monsterposition = gfc_vector2d(700.0f, 500.0f);
     GFC_Rect rectangle = gfc_rect(100, 100, 1000, 500);
@@ -73,13 +73,12 @@ int main(int argc, char* argv[])
 
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
     player = player_new_entity(position);
-    //monster = monster_new_entity(monsterposition);
-    //fire_wizard = fire_wizard_new_entity(gfc_vector2d(700, 200));
+    monster = monster_new_entity(monsterposition);
+    fire_wizard = fire_wizard_new_entity(gfc_vector2d(700, 200));
+    ice_wizard = ice_wizard_new_entity(gfc_vector2d(800, 500));
+    fast_wizard = fast_wizard_new_entity(gfc_vector2d(900, 400));
 
-    //ice_wizard = ice_wizard_new_entity(gfc_vector2d(800, 500));
-    //fast_wizard = fast_wizard_new_entity(gfc_vector2d(900, 400));
-
-    //melee_wizard = melee_wizard_new_entity(gfc_vector2d(600, 200));
+    melee_wizard = melee_wizard_new_entity(gfc_vector2d(600, 200));
 
 
 
@@ -107,15 +106,15 @@ int main(int argc, char* argv[])
         if (SDL_GetTicks() % 1000 < 5)
         {
            // gfc_rect_slog(camera_get_position);
-            slog("Camera Position: %f PLayer Position: %f", camera_get_position().x, get_player_position().x);
+         //   slog("Camera Position: %f PLayer Position: %f", camera_get_position().x, get_player_position().x);
         }
 
-      //  entity_bounds_update(monster);
-      //  entity_bounds_update(fire_wizard);
-      //  entity_bounds_update(fast_wizard);
-      //  entity_bounds_update(ice_wizard);
-      ////  slog("HELP");
-      //  entity_bounds_update(melee_wizard);
+       entity_bounds_update(monster);
+       entity_bounds_update(fire_wizard);
+       entity_bounds_update(fast_wizard);
+       entity_bounds_update(ice_wizard);
+     ////  slog("HELP");
+       entity_bounds_update(melee_wizard);
 
 
 

@@ -150,7 +150,7 @@ void player_think(Entity* self)
 
 
 	}
-	if (keys[SDL_SCANCODE_I])
+	if (keys[SDL_SCANCODE_W])
 	{
 
 		data = get_player_stats();
@@ -160,7 +160,11 @@ void player_think(Entity* self)
 		}
 		else
 		{
-			self->velocity.y = -3;
+			//GFC_Vector2D ground = get_world_ground();
+			//if (self->bounds.h == ground.y)
+			//{
+				self->velocity.y = -3;
+		//	}
 
 		}
 	}
@@ -186,12 +190,12 @@ void player_think(Entity* self)
 	}
 
 
-	if (gfc_input_command_pressed("jump"))
-	{
-		slog("JUMP");
-		self->velocity.y = -3;
+	//if (keys[SDL_SCANCODE_W])
+	//{
+	//	slog("JUMP");
+	//	self->velocity.y = -3;
 
-	}
+	//}
 		//Uint8 currentTime = SDL_GetTicks();
 
 		//if (currentTime - self->lastJumpTime >= 1000)

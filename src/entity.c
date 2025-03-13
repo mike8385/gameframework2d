@@ -338,7 +338,7 @@ void update_entity_lifetime(Entity* self) {
 	Uint32 currentTime = SDL_GetTicks();  // Get the current time
 	if (currentTime - self->spawnTime >= self->TTL) {  // If TTL expired
 		// Log and free the entity
-		slog("Entity expired and is being freed");
+		//slog("Entity expired and is being freed");
 		entity_free(self);  // Free the entity (delete it from memory)
 	}
 }
