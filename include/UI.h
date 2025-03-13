@@ -1,19 +1,13 @@
 #ifndef __UI_H__
 #define __UI_H__
 
+#include "simple_logger.h"
+#include "gfc_shape.h"
+#include "gf2d_sprite.h"
 
-#include "entity.h"
+#include "player.h"
 
-//typedef struct s_Effect
-//{
-//	Uint32		statusDamage;
-//	Uint8		fireEffect;
-//}Effects;
-//
-//
-//void status_give_effect(Entity* self, Effects status);
-//
-//
+void UI_health_bar(GFC_Rect box);
 
 
 #endif

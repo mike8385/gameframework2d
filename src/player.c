@@ -3,12 +3,15 @@
 #include "simple_logger.h"
 #include "gfc_shape.h"
 #include "gf2d_draw.h"
+#include "gfc_input.h"
 
 #include "camera.h"
 #include "entity.h"
 #include "player.h"
 #include "magic.h"
 #include "melee.h"
+
+#include "status.h"
 
 
 typedef struct {
@@ -50,11 +53,14 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->lastJumpTime = 0;
 	self->jumpCooldown = 0;
 	self->collidedType = ETC_entity;
-	self->health = 100;
+	self->health = 60.0f;
+	self->maxHealth = 60.0f;
 	self->worldTime = SDL_GetTicks();
 
 	self->position = position;
-	self->damage = 10;
+	self->damageDelt = 10;
+	self->lastDamageTime = 0;
+
 
 	Stats* data;
 	data = gfc_allocate_array(sizeof(Stats), 1);
@@ -64,12 +70,17 @@ Entity* player_new_entity(GFC_Vector2D position)
 		data->magic = 1;
 		data->speed = 1;
 		data->defense = 1;
+		data->luck = 1;
 		data->EXP = 0;
 	}
 	self->data = data;
 
+	new_status_assign(self);
+	self->isPlayer = 1;
+
 	player_system.playerData = self;
 	player_system.playerStats = self->data;
+	
 	return self;
 }
 
@@ -91,87 +102,118 @@ void player_think(Entity* self)
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	if (keys[SDL_SCANCODE_D])		//gfc_input_command_down("right")
 	{
-		self->velocity.x = 3;
-		//self->sprite =gf2d_sprite_load_all(
-		//	"images/players/wizardSprites/PNG/wizard/wizard_run.png",
-		//	128,
-		//	128,
-		//	4,
-		//	0);
-		//self->sprite = gf2d_sprite_load_image("images/players/wizardSprites/PNG/wizard/wizard_run.png");
-		//self->sprite->frame_w = 128;
-		//self->sprite->frame_h = 128;
+		data = get_player_stats();
 
-		//slog("Clicked D");
+		self->sprite = gf2d_sprite_load_all(
+			"images/players/wizardSprites/PNG/wizard/wizard_run.png",
+			128,  // Frame width
+			128,  // Frame height
+			4,    // Number of frames
+			0     // Animation speed
+		);
+		if (data->speed > 1)
+		{
+			self->velocity.x = 3 + (1.5 * data->speed);
+		}
+		else
+		{
+			self->velocity.x = 3;
+
+
+		}
+		
 
 	}
 	else if (keys[SDL_SCANCODE_A])
 	{
 		data = get_player_stats();
-		if (data->speed == 2)
+		if (data->speed > 1)
 		{
-			self->velocity.x = -4;
+			self->velocity.x = -3 - (1.5*data->speed);
 		}
 		else
 		{
 			self->velocity.x = -3;
 
 		}
+		self->sprite = gf2d_sprite_load_all(
+			"images/players/wizardSprites/PNG/wizard/wizard_run.png",
+			128,  // Frame width
+			128,  // Frame height
+			4,    // Number of frames
+			0     // Animation speed
+		);
 	}
 	else
 	{
 		self->velocity.x = 0;
-	}
-	if (keys[SDL_SCANCODE_W])
-	{
-		self->velocity.y = -3;
-		//slog("Clicked D");
-	}
-	else if (keys[SDL_SCANCODE_S])
-	{
-		self->velocity.y = 3;
-		//slog("Clicked D");
-	}
-	else
-	{
-		self->velocity.y = 0;
-		//self->sprite = gf2d_sprite_load_all(
-		//	"images/players/wizardSprites/PNG/wizard/wizard_run.png",
-		//	128,
-		//	128,
-		//	4,
-		//	0);
-		//self->sprite = gf2d_sprite_load_image("images/players/wizardSprites/PNG/wizard/wizard_run.png");
-		//self->sprite->frame_w = 128;
-		//self->sprite->frame_h = 128;
 
 
 	}
-
-
-	if (keys[SDL_SCANCODE_SPACE])
+	if (keys[SDL_SCANCODE_I])
 	{
-		Uint8 currentTime = SDL_GetTicks();
 
-		if (currentTime - self->lastJumpTime >= 1000)
-		{ // 3000 ms = 3 seconds
-			self->jumpCooldown = 0;
-
-		}
-
-
-		if (self->jumpCooldown == 0)
+		data = get_player_stats();
+		if (data->speed > 1)
 		{
-			slog("test");
-			self->velocity.y = -3;
-			self->acceleration.y = 4;
-			self->lastJumpTime = 3;
+			self->velocity.y = -3 - (1.5 * data->speed);
 		}
 		else
 		{
 			self->velocity.y = -3;
+
 		}
 	}
+	else if (keys[SDL_SCANCODE_S])
+	{
+		data = get_player_stats();
+		if (data->speed > 1)
+		{
+			self->velocity.y = 3 + (1.5 * data->speed);
+		}
+		else
+		{
+			self->velocity.y = 3;
+
+		}
+	}
+	else
+	{
+		self->velocity.y = 0;
+
+
+
+	}
+
+
+	if (gfc_input_command_pressed("jump"))
+	{
+		slog("JUMP");
+		self->velocity.y = -3;
+
+	}
+		//Uint8 currentTime = SDL_GetTicks();
+
+		//if (currentTime - self->lastJumpTime >= 1000)
+		//{ // 3000 ms = 3 seconds
+		//	self->jumpCooldown = 0;
+
+		//}
+
+
+		//if (self->jumpCooldown == 0)
+		//{
+		//	slog("test");
+		//	self->velocity.y = -3;
+		//	self->acceleration.y = 4;
+		//	self->lastJumpTime = 3;
+		//	self->jumpCooldown = 4;
+		//}
+		//else
+		//{
+		//	self->velocity.y = 3;
+		//}
+	//}
 
 	player_level_up(self);
 
@@ -187,8 +229,11 @@ void player_update(Entity* self)
 	self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
 	player_attack(self);
 	self->worldTime = SDL_GetTicks();
-
+	player_status(self);
 	camera_center_on(self->position);
+	//slog("Health is: %f", self->health);
+
+
 }
 
 void player_attack(Entity* self)
@@ -224,7 +269,7 @@ void player_attack(Entity* self)
 		//spell->acceleration = gfc_vector2d(0.1f, 0.f);
 		//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
 
-
+			spell->damageDelt = self->damageDelt;
 			spell_move(spell);
 			self->magicCooldown = 3;
 			self->lastAttackTime = self->worldTime;
@@ -239,15 +284,49 @@ void player_attack(Entity* self)
 
 		//spell->acceleration = gfc_vector2d(0.1f, 0.f);
 		//spell->position = gfc_vector2d(self->position.x + 3, self->position.y);
+		//if ((stats->strength  2))
+		//{
+			self->damageDelt = 10 * stats->strength;
+
+		//	if (stats->luck >= 1)
+			//{
+				float luckChance = (float)((stats->luck * gfc_random_int(10) % 5));//damageDelt
+				slog("LUCKcHANCE %f", luckChance);
+		//	}
+
+				if ((stats->luck == 1) && (luckChance != 0) && (luckChance <= 2))
+				{
+					self->damageDelt = self->damageDelt * luckChance;
+				}
+
+				if ((stats->luck == 2) && (luckChance != 0) && (luckChance <= 3))
+				{
+					self->damageDelt = self->damageDelt * luckChance;
+				}
+				if ((stats->luck == 3) && (luckChance != 0) && (luckChance <= 4))
+				{
+					self->damageDelt = self->damageDelt * luckChance;
+				}
+				if ((stats->luck == 4) && (luckChance <= 5))
+				{
+					self->damageDelt = self->damageDelt * luckChance;
+				}
+				if ((stats->luck == 5) && (luckChance <= 6))
+				{
+					self->damageDelt = self->damageDelt * luckChance;
+				}
 
 
+			slog("Melee Damage: %f", self->damageDelt);
+			melee->collidedType = MT_melee;
+		melee->damageDelt = self->damageDelt;
 		melee_move(melee, self);
 		self->meleeCooldown = 3;
 		self->lastAttackTimeMelee = self->worldTime;
 		
 	}
 
-	if (keys[SDL_SCANCODE_Z] && (self->magicCooldown == 0))
+	if (keys[SDL_SCANCODE_Z] && (self->magicCooldown == 0) && (stats->magic >= 2))
 	{
 
 		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
@@ -260,7 +339,7 @@ void player_attack(Entity* self)
 		self->lastAttackTime = self->worldTime;
 	}
 
-	if (keys[SDL_SCANCODE_R] && (self->burstMagicCooldown == 0) && (stats->magic >=2 ))
+	if (keys[SDL_SCANCODE_R] && (self->burstMagicCooldown == 0) && (stats->magic >=3 ))
 	{
 
 		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
@@ -272,20 +351,20 @@ void player_attack(Entity* self)
 		self->lastAttackTimeBurst = self->worldTime;
 	}
 
-	if (keys[SDL_SCANCODE_C] && (self->wallMagicCooldown == 0))
+	if (keys[SDL_SCANCODE_C] && (self->wallMagicCooldown == 0) && (stats->magic >= 4))
 	{
 
 		Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
 		spell->worldTime = self->worldTime;
-		spell->magicType = MT_wall;
+		spell->magicType = MT_freeze;
 		spell_move(spell);
 		Entity* spell2 = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y-50));
 		spell2->worldTime = self->worldTime;
-		spell2->magicType = MT_wall;
+		spell2->magicType = MT_freeze;
 		spell_move(spell2);
 		Entity* spell3 = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y+50));
 		spell3->worldTime = self->worldTime;
-		spell3->magicType = MT_wall;
+		spell3->magicType = MT_freeze;
 		spell_move(spell3);
 
 		self->wallMagicCooldown = 10;
@@ -301,33 +380,168 @@ void player_level_up(Entity* self)
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	Stats* stats;
 	stats = get_player_stats();
+	
+	//Button "L" is to level up speed
 	if (keys[SDL_SCANCODE_L])
 	{
 
 		slog("EXP: %d", stats->EXP);
-		if (stats->EXP == 1)
+		if ((stats->EXP >= 1) && (stats->speed < 5))
 		{
 			stats->speed += 1;
-			stats->EXP = 0;
+			if (stats->EXP > 0)
+			{
+				stats->EXP = stats->EXP--;
+			}
+			else
+			{
+				stats->EXP = 0;
+			}
 		}
 		slog("SPEED %d", stats->speed);
 
 	}
 
+	//Button "M" is to level up Magic
 	if (keys[SDL_SCANCODE_M])
 	{
 
-		slog("EXP: %d", stats->magic);
-		if (stats->EXP == 1)
+		slog("EXP: %d", stats->EXP);
+		if ((stats->EXP >= 1) && (stats->magic < 5))
 		{
 			stats->magic += 1;
-			stats->EXP = 0;
+			if (stats->EXP > 0)
+			{
+				stats->EXP = stats->EXP--;
+			}
+			else
+			{
+				stats->EXP = 0;
+			}
 		}
-		slog("SPEED %d", stats->magic);
+		slog("MAGIC %d", stats->magic);
+
+	}
+	//The button "P" is to level up defense
+	if (keys[SDL_SCANCODE_P])
+	{
+		slog("%f", self->maxHealth);
+		slog("EXP: %d", stats->EXP);
+		if ((stats->EXP >= 1) && (stats->defense < 5))
+		{
+			stats->defense += 1;
+			self->maxHealth = self->maxHealth + 10;
+			if (stats->EXP > 0)
+			{
+				stats->EXP = stats->EXP--;
+			}
+			else
+			{
+				stats->EXP = 0;
+			}
+		}
+		slog("DEFENSE %d", stats->defense);
+
+	}
+
+	//Button "N" is to upgrade attack
+	if (keys[SDL_SCANCODE_N])
+	{
+		slog("%f", self->damageDelt);
+		slog("EXP: %d", stats->EXP);
+		if ((stats->EXP >= 1) && (stats->strength < 5))
+		{
+			stats->strength += 1;
+			self->maxHealth = self->maxHealth + 10;
+			if (stats->EXP > 0)
+			{
+				stats->EXP = stats->EXP--;
+			}
+			else
+			{
+				stats->EXP = 0;
+			}
+		}
+		slog("STRENGTH %d", stats->strength);
+
+	}
+
+	//The button "b" is to level up luck
+	if (keys[SDL_SCANCODE_B])
+	{
+		slog("%f", self->damageDelt);
+		slog("EXP: %d", stats->EXP);
+		if ((stats->EXP >= 1) && (stats->luck < 5))
+		{
+			stats->luck += 1;
+			if (stats->EXP > 0)
+			{
+				stats->EXP = stats->EXP--;
+			}
+			else
+			{
+				stats->EXP = 0;
+			}
+		}
+		slog("LUCK %d", stats->luck);
 
 	}
 }
 
+
+void player_status(Entity* self)
+{
+	if (!self) return;
+
+	if (!self->statusEffects) return;
+
+	
+
+
+	//slog("Freeze Effect: %d", self->statusEffects->freezeEffect);
+
+	if (self->statusEffects->fireEffect)
+	{
+		float currentTime = SDL_GetTicks();
+		if (currentTime - self->lastDamageTime >= 200) // 1 second cooldown
+		{
+			slog("Burning");
+			self->health -= self->statusEffects->statusDamage;
+			self->lastDamageTime = currentTime;
+			slog("HEalth: %f", self->health);
+		}
+
+		if (currentTime - self->statusEffects->statusStart >= self->statusEffects->TTL_fire)
+		{
+			slog("Unburn");
+			self->statusEffects->fireEffect = 0;
+			slog("HEalth: %f", self->health);
+
+		}
+	}
+
+
+	if (self->statusEffects->freezeEffect) // If frozen
+	{
+
+		if (self->worldTime - self->statusEffects->statusStart >= self->statusEffects->TTL_freeze)
+		{
+			self->statusEffects->freezeEffect = 0;
+			self->velocity.x = -1; // Stay frozen
+			slog("Unfrozen");
+
+
+		}
+		else
+		{
+			self->velocity.x = 0; // Stay frozen
+			slog("Frozen");
+
+		}
+
+	}
+
+}
 
 //Void player free
 /*
@@ -370,4 +584,12 @@ Stats* get_player_stats()
 	return player_system.playerData->data;
 }
 
+float get_player_health()
+{
+	return player_system.playerData->health;
+}
 
+void player_health_check()
+{
+
+}

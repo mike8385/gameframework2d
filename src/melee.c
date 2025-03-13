@@ -19,7 +19,7 @@ Entity* melee_new_entity(GFC_Vector2D position)
 	gfc_vector2d_copy(melee->position, position);
 
 	melee->sprite = gf2d_sprite_load_all(
-		"images/players/wizardSprites/PNG/wizard/wizard_ball.png",
+		"images/players/wizardSprites/PNG/wizard/wizard_melee.png",
 		50,
 		50,
 		1,
@@ -29,7 +29,9 @@ Entity* melee_new_entity(GFC_Vector2D position)
 	melee->update = melee_update;
 	melee->think = melee_think;
 	melee->collidedType = ETC_magic;
+	melee->magicType = MT_melee;
 	melee->collision = melee_collision;
+
 	melee->TTL = 20;
 	melee->spawnTime = SDL_GetTicks();  // Set the current time
 
@@ -47,7 +49,19 @@ void melee_move(Entity* self, Entity* other)
 //	}
 
 //	self->lastAttackTime = currentTimeAttack;
-	self->position = other->position;
+	if (other->isPlayer)
+	{
+		self->position = other->position;
+		self->position.x = other->position.x +128;
+
+
+	}
+	else
+	{
+		self->position = other->position;
+		self->position.x = other->position.x - 50;
+	}
+	
 
 
 
@@ -115,12 +129,24 @@ void melee_collision(Entity* self)
 	{
 		Entity* other = (Entity*)gfc_list_nth(list, i);
 
-		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster))
+		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster) && (self->magicType == MT_melee))
 		{
+			//self->damageDelt = 10;
 			entity_free(self);
-			//entity_damage(other);
-			entity_free(other);
+			entity_damage(self, other);
+			slog("Damaged Entity");
+
+
+		}
+
+		if ((self->collidedType == ETC_monster_spell) && (other->collidedType == ETC_entity) && (self->magicType == MT_melee))
+		{
+			self->damageDelt = 10;
+			entity_free(self);
+			entity_damage(self, other);
+			slog("Damaged Player");
 		}
 	}
 }
+
 

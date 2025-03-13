@@ -9,7 +9,7 @@
 
 #include "entity.h"
 #include "world.h"
-
+#include "camera.h"
 
 
 typedef struct {
@@ -80,12 +80,14 @@ void entity_json_use(const char* filename)
 
 void entity_draw(Entity* self)
 {
+	GFC_Vector2D offset, position;
 	if (!self) return;
 	if (!self->sprite) return;
-
+	offset = camera_get_offset();
+	gfc_vector2d_add(position, self->position, offset),
 	gf2d_sprite_draw(
 		self->sprite,
-		self->position,
+		position,
 		NULL,
 		NULL,
 		NULL,
@@ -220,46 +222,34 @@ void entity_bounds_update(Entity* self)
 	GFC_Rect worldBounds = get_world_bounds();
 	GFC_Vector2D* poc = { 0 };
 	GFC_Vector2D* normal = { 0 };
+
 	gfc_rect_overlap_poc(self->bounds, worldBounds, poc, normal);
 	if (!gfc_point_in_rect(gfc_vector2d(self->bounds.x, self->bounds.y), worldBounds) || !gfc_point_in_rect(gfc_vector2d(self->bounds.x + self->bounds.w, self->bounds.y + self->bounds.h), worldBounds))//(gfc_rect_overlap_poc(self->bounds, world->bounds, poc, normal))//
 	{
 		if (self->bounds.x < worldBounds.x)
 		{
+			
 			self->position.x = worldBounds.x;
+
 		}
 
 		if (self->bounds.y < worldBounds.y)
 		{
 			self->position.y = worldBounds.y;
+
 		}
 
 		if (self->bounds.x + self->bounds.w > worldBounds.x + worldBounds.w)
 		{
 			self->position.x  = worldBounds.x + worldBounds.w - self->bounds.w;
+
 		}
 
 		if (self->bounds.y + self->bounds.h > worldBounds.y + worldBounds.h)
 		{
 			self->position.y = worldBounds.y + worldBounds.h - self->bounds.h;
-		}
-		/*if (gfc_point_in_rect(gfc_vector2d(self->bounds.x + self->bounds.w, self->bounds.y + self->bounds.h), world->bounds))
-		{
-			slog("Crossing");
-		}*/
 
-		//if (gfc_rect_overlap_poc(self->bounds, world->bounds, NULL, -1))
-		//{gfc_point_in_rect(gfc_vector2d(self->bounds.x, self->bounds.y), world->bounds)
-		//	self->acceleration = gfc_vector2d(0.f, 0.f);
-		//	self->position = gfc_vector2d(self->position.x + 2, self->position.y);
-		//}
-		//gfc_rect_overlap_poc(self->bounds, world->bounds, poc, normal);
-		/*if ((world->bounds.x <= self->bounds.x) && (world->bounds.x+world->bounds.w) > self->bounds.x)
-		{
-			
-		}*/
-		//else if (self->bounds.x == se)
-		//slog("POC: %f",poc);
-		//slog("NORMAL: %f", normal);
+		}
 
 		entity_update(self);
 	}
@@ -355,10 +345,15 @@ void update_entity_lifetime(Entity* self) {
 
 void entity_damage(Entity* self, Entity* other)
 {
+	//slog("%f", other->health);
 	other->health = other->health - self->damageDelt;
-	if (other->health == 0)
+	if (other->health <= 0.0f)
 	{
-		entity_free(other);
+		if (!other->isPlayer)
+		{
+			entity_free(other);
+
+		}
 	}
 
 }

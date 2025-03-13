@@ -88,21 +88,48 @@ void effect_system_init(Uint32 maxEnts)
 }
 
 
-void status_give_effect(Entity* self, Effects* status)
+void status_give_effect(Entity* self)// , Effects* status)
 {
-	Uint32 worldTime = get_world_time();
-	Uint32 currentTime = SDL_GetTicks();
 	if (!self) return;
-	if (!status) return;
-	if (status->fireEffect)
+
+	slog("Applying status effect: Fire: %d, Freeze: %d, Damage: %f",
+		self->statusEffects->fireEffect,
+		self->statusEffects->freezeEffect,
+		self->statusEffects->statusDamage);
+
+	if (self->statusEffects->fireEffect)
 	{
-		while (currentTime - status->statusStart >= status->TTL_fire)
-		{
-			slog("health: %d\n", self->health);
-			self->health = self->health - 10;
-
-		}
-
+		self->statusEffects->statusStart = SDL_GetTicks();
+		//self->statusEffects->currentTime = SDL_GetTicks();
 	}
 
+	if (self->statusEffects->freezeEffect)
+	{
+		self->statusEffects->statusStart = SDL_GetTicks();
+		//self->statusEffects->currentTime = SDL_GetTicks();
+	}
+
+}
+
+Effects* new_status_assign(Entity* self)
+{
+	Effects* statusEffect;
+	statusEffect = gfc_allocate_array(sizeof(Effects), 1);
+	if (statusEffect)
+	{
+		statusEffect->_inuse = 0;						/**<Memory management flag*/
+		statusEffect->statusDamage = 0.0f;
+		statusEffect->statusStart = 0;
+		//statusEffect->endTime = 0;
+
+
+		statusEffect->fireEffect = 0;
+		statusEffect->TTL_fire = 2000;
+
+		statusEffect->freezeEffect = 0;
+		statusEffect->TTL_freeze = 9000;
+
+
+	}
+	self->statusEffects = statusEffect;
 }

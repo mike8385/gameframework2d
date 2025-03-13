@@ -1,25 +1,25 @@
 #include <SDL.h>
 #include "simple_logger.h"
 
-#include "monster.h"
+#include "end_boss.h"
 #include "player.h"
 #include "magic.h"
 #include "status.h"
 
-Entity* monster_new_entity(GFC_Vector2D position)
+Entity* end_boss_new_entity(GFC_Vector2D position)
 {
 	Entity* self;
 	self = entity_new();
 	if (!self)
 	{
-		slog("failed to spawn a monster entity");
+		slog("failed to spawn a end_boss entity");
 		return NULL;
 	}
 	gfc_vector2d_copy(self->position, position);
-	self->think = monster_think;
-	self->update = monster_update;
+	self->think = end_boss_think;
+	self->update = end_boss_update;
 	self->sprite = gf2d_sprite_load_all(
-		"images/ed210.png",
+		"images/players/wizardSprites/PNG/wizard_fire/fbwizard_idle3.png",
 		128,
 		128,
 		16,
@@ -29,73 +29,77 @@ Entity* monster_new_entity(GFC_Vector2D position)
 	self->lastAttackTime = 0;
 	self->health = 100.0f;
 	new_status_assign(self);
+	self->velocity.x = 4;
+	self->velocity.y = 0;
+
+	return self;
 
 
 
 }
 
-void monster_move(Entity* self)
+void end_boss_move(Entity* self)
 {
 	if (!self) return;
+
 	GFC_Rect playerBounds = get_player_bounds();
 
-	gfc_vector2d_add(self->position, self->velocity, self->position);
-	if ((monster_see_player(self)) && (self->statusEffects->freezeEffect == 0))
+	// Move the entity
+	gfc_vector2d_add(self->position, self->position, self->velocity);
+
+	//Reverse direction when hitting boundaries
+	if (self->position.x <= 400)
 	{
-		self->velocity.x = -1;
-
-		if (self->position.x <= (playerBounds.x + playerBounds.w + (double)50))
-		{
-			self->velocity.x = 0;
-		}
-		if ((playerBounds.x + playerBounds.w + (double)50) >= self->position.x)
-		{
-			self->velocity.x = 1;
-		}
+		self->velocity.x = 3;  // Move right
 	}
-	//slog("Position is: %f", self->position);
+	else if (self->position.x >= 600)
+	{
+		self->velocity.x = -3; // Move left
+	}
 
-
+	//slog("Wizard Position: %f, Velocity: %f", self->position.x, self->velocity.x);
 }
 
-void monster_think(Entity* self)
+
+void end_boss_think(Entity* self)
 {
 	if (!self) return;
 	//GFC_Vector2D velocity;
 	self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
-	monster_see_player(self);
+	end_boss_see_player(self);
 
 
 }
 
-void monster_update(Entity* self)
+void end_boss_update(Entity* self)
 {
 	if (!self) return;
-	monster_damage(self);
-	monster_move(self);
+	end_boss_move(self);
 	self->frame += 0.05f;
 	//slog("Frame is: %f", self->frame);
 	if (self->frame >= 4) self->frame = 0;
-	monster_attack(self);
-	monster_status(self);
+	end_boss_attack(self);
+	end_boss_status(self);
+	end_boss_damage(self);
 	self->worldTime = SDL_GetTicks();
 
 
 
 }
 
-void monster_damage(Entity* self)
+void end_boss_damage(Entity* self)
 {
 	if (!self) return;
-	
 	if (self->health <= 0.0f)
 	{
-		gf2d_sprite_free(self->sprite);
+		//slog("Health: %d", self->health);
+
+	//	slog("Died");
 		entity_free(self);
 	}
 }
 
-Uint8 monster_see_player(Entity* self)
+Uint8 end_boss_see_player(Entity* self)
 {
 	if (!self) return;
 	GFC_Vector2D playerPosition = get_player_position();
@@ -116,43 +120,43 @@ Uint8 monster_see_player(Entity* self)
 	return 0;
 }
 
-void monster_track_player(Entity* self)
+void end_boss_track_player(Entity* self)
 {
 	if (!self) return;
 	GFC_Vector2D playerPosition = get_player_position();
 }
 
-void monster_attack(Entity* self)
+void end_boss_attack(Entity* self)
 {
 	if (!self)return;
 	GFC_Rect playerBounds = get_player_bounds();
-	if (monster_see_player(self))
+	if (end_boss_see_player(self))
 	{
-		if (self->statusEffects->freezeEffect == 0)
+
+		Uint32 currentTime = SDL_GetTicks(); // Get current time in milliseconds
+		if (currentTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
+			self->magicCooldown = 0;
+		}
+		if (self->magicCooldown == 0)
 		{
-			Uint32 currentTime = SDL_GetTicks(); // Get current time in milliseconds
-			if (currentTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
-				self->magicCooldown = 0;
-			}
-			if (self->magicCooldown == 0)
-			{
-				Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
+			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
 
-				spell->collidedType = ETC_monster_spell;
+			spell->collidedType = ETC_monster_spell;
+			spell->magicType = MT_rapid;
 
 
-				spell_move(spell);
-				self->magicCooldown = 3;
-				self->lastAttackTime = currentTime;
-			}
+			spell_move(spell);
+			self->magicCooldown = 3;
+			self->lastAttackTime = currentTime;
 		}
 
-		
+
+
 
 	}
 }
 
-void monster_status(Entity* self)
+void end_boss_status(Entity* self)
 {
 	if (!self) return;
 
@@ -204,17 +208,4 @@ void monster_status(Entity* self)
 
 	}
 
-}
-
-void monster_free(Entity* self)
-{
-	if ((!self) || (!self->data) || (!self->statusEffects)) return;
-	Entity* data = self->data;
-	//gf2d_sprite_free(data->)
-	gf2d_sprite_free(data->sprite);
-	free(self->data);
-	free(data);
-	self->data = NULL;
-	slog("Freed");
-	free(self);
 }

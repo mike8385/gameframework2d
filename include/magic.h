@@ -46,5 +46,9 @@ void spell_collision(Entity* self);
 * @param The entity itself
 */
 void spell_type(Entity* self);
+
+void magic_free(Entity* self);
+
+
 #pragma once
 #endif

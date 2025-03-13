@@ -11,6 +11,7 @@ typedef struct S_stats
 	Uint8	magic;
 	Uint8	defense;
 	Uint8	speed;
+	Uint8	luck;
 	Uint32	EXP;
 }Stats;
 
@@ -39,20 +40,48 @@ void player_think(Entity *self);
 */
 void player_update(Entity *self);
 
+/**
+* @brief Attack for the player
+* @param The entity itself
+*/
 void player_attack(Entity* self);
 
+/**
+* @brief Gets the player bounds
+* @Note: This is so that anything can get bounds for player
+* return GFC_Rect of the bounds box
+*/
 GFC_Rect get_player_bounds();
 
-
+/**
+* @brief Gets the player position
+* @Note: This is so that anything can get position for player
+* return GFC_Vector2D of the position
+*/
 GFC_Vector2D get_player_position();
 
+
+/**
+* @brief frees the player
+* @param player itself
+*/
 void player_free(Entity* self);
 
-
+/**
+* @brief Gets the stats for the player, this allows us to upgrade them
+* return Stats
+*/
 Stats* get_player_stats();
 
+/*
+* @Brief Allows the player to level up.
+*/
 void player_level_up(Entity* self);
 
+
+float get_player_health();
+
+void player_status(Entity* self);
 
 #endif
 #pragma once

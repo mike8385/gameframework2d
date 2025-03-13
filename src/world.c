@@ -4,6 +4,8 @@
 #include "camera.h"
 
 #include "world.h"
+#include "entity.h"
+#include "fire_wizard.h"
 
 
 typedef struct {
@@ -17,6 +19,7 @@ static WorldSystem world_system = { 0 }; /**<Initalize a LOCAL global entity man
 
 World* world_test_new()
 {
+	//Entity* fire_wizard;
 	int i, j;
 	int width = 500, height = 500;
 	World* world;
@@ -40,8 +43,10 @@ World* world_test_new()
 		world->tileMap[i*width] = 1;
 		world->tileMap[i*width + (width-1)] = 1;
 	}
-	world->bounds = gfc_rect(100, 100, 1000, 500);
+	world->bounds = gfc_rect(0, 100, 10000, 500);
 	world_system.worldData = world;
+	//fire_wizard = fire_wizard_new_entity(gfc_vector2d(700, 200));
+	//entity_bounds_update(fire_wizard);
 	return world;
 }
 
@@ -72,7 +77,6 @@ World* world_new(Uint32 width, Uint32 height)
 	world->tileWidth = width;
 	world->bounds = gfc_rect(0,0,width,height);
 	world->worldTime = SDL_GetTicks();
-
 
 	return world;
 
@@ -130,6 +134,7 @@ void* world_draw(World* world)
 		}
 	}
 	
+	
 }
 
 GFC_Rect get_world_bounds()
@@ -141,7 +146,7 @@ void world_setup_camera(World* world)
 {
 	if (!world) return;
 	//if(!world->tileLayer)
-	camera_set_bounds(gfc_rect(0, 0, 50, 50));
+	camera_set_bounds(gfc_rect(0, 0, 1200, 720));
 	camera_bounds_check();
 }
 
@@ -149,3 +154,4 @@ Uint32 get_world_time()
 {
 	return world_system.worldData->worldTime;
 }
+

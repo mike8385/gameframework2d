@@ -40,10 +40,12 @@ typedef enum
 	MT_magic = 1,
 	MT_fire = 2,
 	MT_rapid = 3,
-	MT_wall = 4,
-	MT_MAX = 5
+	MT_freeze = 4,
+	MT_melee = 5,
+	MT_MAX = 6
 } MagicType;
 
+typedef struct s_Effect Effects;
 
 
 typedef struct Entity_S
@@ -74,18 +76,20 @@ typedef struct Entity_S
 	Uint32					lastAttackTimeMelee;
 	float					meleeCooldown;
 
-	Uint32					worldTime;
+	float					worldTime;
 	MagicType				magicType; /**<Type of magic thats gettting shot*/
-	//Effects					statusEffects;
+	Effects*					statusEffects;
 
-	Uint32					TTL;
-	Uint32					spawnTime;
+	float					TTL;
+	float					spawnTime;
 
 	Uint32					lastJumpTime;
 
 	float jumpCooldown;
-	int health;
-	int damageDelt;
+	float health;
+	float maxHealth;
+	float damageDelt;
+	float lastDamageTime;
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/
@@ -98,7 +102,7 @@ typedef struct Entity_S
 	void* data;									/**<For ad hoc addition data for the entity*/
 	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
 
-
+	Uint8			isPlayer;
 	
 	//
 

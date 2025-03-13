@@ -41,6 +41,11 @@ Uint8 monster_see_player(Entity* self);
 
 void monster_attack(Entity* self);
 
+void monster_status(Entity* self);
+
+void monster_free(Entity* self);
+
+
 
 #endif
 #pragma once

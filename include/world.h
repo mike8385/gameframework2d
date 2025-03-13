@@ -7,14 +7,15 @@
 
 typedef struct
 {
-	Sprite*			background;				/**<Background image for the world*/
-	Sprite*			tileLayer;
+	Sprite* background;				/**<Background image for the world*/
+	Sprite* tileLayer;
 	GFC_Rect		bounds;					/**<Bounds for the map*/
-	Sprite*			tileSet;				/**Sprite containing tiles for the world<*/
-	Uint8*			tileMap;				/**<The tiles that make up the world*/
+	Sprite* tileSet;				/**Sprite containing tiles for the world<*/
+	Uint8* tileMap;				/**<The tiles that make up the world*/
 	Uint32			tileHeight;				/**<How many tiles tall the map is*/
 	Uint32			tileWidth;				/**<How many tiles long the map is*/
 	Uint32			worldTime;
+	GFC_Rect		ground;
 }World;
 
 /**
@@ -33,7 +34,7 @@ World* world_new(Uint32 width, Uint32 height);
 * @brief free a previously allocated world
 * @param world the world to free
 */
-void world_free(World *world);
+void world_free(World* world);
 
 /**
 * @brief draw the world
