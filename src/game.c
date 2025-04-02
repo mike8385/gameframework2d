@@ -14,7 +14,7 @@
 #include "fast_wizard.h"
 #include "ice_wizard.h"
 #include "melee_wizard.h"
-
+#include "end_boss.h"
 
 
 
@@ -40,13 +40,14 @@ int main(int argc, char* argv[])
     Sprite* mouse;
     GFC_Color mouseGFC_Color = gfc_color8(255, 100, 255, 200);
     Entity* player;
-    //Entity* monster;
-    //Entity* fire_wizard;
-    //Entity* ice_wizard;
-    //Entity* fast_wizard;
-    //Entity* melee_wizard;
+    Entity* monster;
+    Entity* fire_wizard;
+    Entity* ice_wizard;
+    Entity* fast_wizard;
+    Entity* melee_wizard;
+    Entity* boss_wizard;
     GFC_Vector2D position = gfc_vector2d(100.0f, 500.0f);
-    GFC_Vector2D monsterposition = gfc_vector2d(700.0f, 500.0f);
+    GFC_Vector2D monsterposition = gfc_vector2d(500.0f, 500.0f);
     GFC_Rect rectangle = gfc_rect(100, 100, 1000, 500);
 
     /*program initializtion*/
@@ -60,7 +61,7 @@ int main(int argc, char* argv[])
         720,
         gfc_vector4d(0, 0, 0, 255),
         0);
-    gfc_input_init("gfc/sample_config/input.cfg");
+    gfc_input_init("config/input.cfg");
     gf2d_graphics_set_frame_delay(16);
     gf2d_sprite_init(1024);
     entity_system_init(1024);
@@ -73,26 +74,27 @@ int main(int argc, char* argv[])
 
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
     player = player_new_entity(position);
-    //monster = monster_new_entity(monsterposition);
-    //fire_wizard = fire_wizard_new_entity(gfc_vector2d(700, 200));
-
-    //ice_wizard = ice_wizard_new_entity(gfc_vector2d(800, 500));
-    //fast_wizard = fast_wizard_new_entity(gfc_vector2d(900, 400));
-
-    //melee_wizard = melee_wizard_new_entity(gfc_vector2d(600, 200));
+    monster = monster_new_entity(monsterposition);
+    fire_wizard = fire_wizard_new_entity(gfc_vector2d(1000, 500));
+    ice_wizard = ice_wizard_new_entity(gfc_vector2d(2000, 500));
+    fast_wizard = fast_wizard_new_entity(gfc_vector2d(2500, 500));
+    melee_wizard = melee_wizard_new_entity(gfc_vector2d(700, 500));
+    //boss_wizard = end_boss_new_entity(gfc_vector2d(2000, 500));
 
 
 
 
     //fire_wizard = fire_wi
-    world = world_test_new();
-    world_setup_camera(world);
+    //world = world_test_new();
+    world = world_load("maps/testworld.");
+    //world_setup_camera(world);
 
     slog("press [escape] to quit");
     /*main game loop*/
     while (!done)
     {
-        SDL_PumpEvents();   // update SDL's internal event structures
+        gfc_input_update();
+     //   SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         /*update things here*/
         SDL_GetMouseState(&mx, &my);
@@ -104,19 +106,18 @@ int main(int argc, char* argv[])
         entity_system_move();
         entity_bounds_update(player);
 
-        if (SDL_GetTicks() % 1000 < 5)
-        {
+        //if (SDL_GetTicks() % 1000 < 5)
+       // {
            // gfc_rect_slog(camera_get_position);
-            slog("Camera Position: %f PLayer Position: %f", camera_get_position().x, get_player_position().x);
-        }
+            //slog("Camera Position: %f PLayer Position: %f", camera_get_position().x, get_player_position().x);
+       // }
 
-      //  entity_bounds_update(monster);
-      //  entity_bounds_update(fire_wizard);
-      //  entity_bounds_update(fast_wizard);
-      //  entity_bounds_update(ice_wizard);
-      ////  slog("HELP");
-      //  entity_bounds_update(melee_wizard);
-
+        entity_bounds_update(monster);
+        entity_bounds_update(fire_wizard);
+        entity_bounds_update(fast_wizard);
+        entity_bounds_update(ice_wizard);
+        entity_bounds_update(melee_wizard);
+        //entity_bounds_update(boss_wizard);
 
 
 

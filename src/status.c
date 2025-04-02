@@ -127,7 +127,7 @@ Effects* new_status_assign(Entity* self)
 		statusEffect->TTL_fire = 2000;
 
 		statusEffect->freezeEffect = 0;
-		statusEffect->TTL_freeze = 9000;
+		statusEffect->TTL_freeze = 2000;
 
 
 	}

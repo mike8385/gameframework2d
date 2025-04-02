@@ -61,15 +61,16 @@ typedef struct Entity_S
 	GFC_Vector2D			velocity;					/**<how we are moving*/
 	GFC_Vector2D			acceleration;
 	EntityTypeCollide		collidedType;
+	float					gravity;
 
 
 	float					magicCooldown;
 	float					fireMagicCooldown;
 	float					burstMagicCooldown;
 	float					wallMagicCooldown;
-	Uint32					lastAttackTime;
-	Uint32					lastAttackTimeBurst;
-	Uint32					lastAttackTimeWall;
+	float					lastAttackTime;
+	float					lastAttackTimeBurst;
+	float					lastAttackTimeWall;
 
 
 	//Code for melee handling
@@ -83,13 +84,15 @@ typedef struct Entity_S
 	float					TTL;
 	float					spawnTime;
 
-	Uint32					lastJumpTime;
+	float					lastJumpTime;
 
-	float jumpCooldown;
-	float health;
-	float maxHealth;
-	float damageDelt;
-	float lastDamageTime;
+	float					jumpCooldown;
+	float					health;
+	float					maxHealth;
+	float					damageDelt;
+	float					lastDamageTime;
+
+	float					onGround;
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/

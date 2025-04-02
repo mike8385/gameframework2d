@@ -60,6 +60,8 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->position = position;
 	self->damageDelt = 10;
 	self->lastDamageTime = 0;
+	self->onGround = 0;
+
 
 
 	Stats* data;
@@ -87,19 +89,10 @@ Entity* player_new_entity(GFC_Vector2D position)
 void player_move(Entity *self)
 {
 	if (!self) return; 
-	
-	//gfc_vector2d_add(self->position, self->velocity, self->position);
-
-
-}
-
-void player_think(Entity* self)
-{
 	Stats* data;
-
-	if (!self) return;
-	//GFC_Vector2D velocity;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
+
+
 	if (keys[SDL_SCANCODE_D])		//gfc_input_command_down("right")
 	{
 		data = get_player_stats();
@@ -121,7 +114,7 @@ void player_think(Entity* self)
 
 
 		}
-		
+
 
 	}
 	else if (keys[SDL_SCANCODE_A])
@@ -129,7 +122,7 @@ void player_think(Entity* self)
 		data = get_player_stats();
 		if (data->speed > 1)
 		{
-			self->velocity.x = -3 - (1.5*data->speed);
+			self->velocity.x = -3 - (1.5 * data->speed);
 		}
 		else
 		{
@@ -186,37 +179,49 @@ void player_think(Entity* self)
 	}
 
 
-	if (gfc_input_command_pressed("jump"))
+	if ((gfc_input_command_pressed("jump")) && (self->onGround == 1))
 	{
-		slog("JUMP");
+		
+		self->onGround = 0;
 		self->velocity.y = -3;
+		self->acceleration.y = -2;
+
+
 
 	}
-		//Uint8 currentTime = SDL_GetTicks();
+	else if (self->onGround == 0)
+	{
+		float	jumpTime = 4000;
+		if (jumpTime >= 0)
+		{
+			jumpTime--;
+			slog("JumpTime: %f", jumpTime);
+		}
 
-		//if (currentTime - self->lastJumpTime >= 1000)
-		//{ // 3000 ms = 3 seconds
-		//	self->jumpCooldown = 0;
+			self->acceleration.y = 1;
 
-		//}
+		
+		//self->acceleration.y = 1;
 
-
-		//if (self->jumpCooldown == 0)
-		//{
-		//	slog("test");
-		//	self->velocity.y = -3;
-		//	self->acceleration.y = 4;
-		//	self->lastJumpTime = 3;
-		//	self->jumpCooldown = 4;
-		//}
-		//else
-		//{
-		//	self->velocity.y = 3;
-		//}
-	//}
+	}
+	else
+	{
+		//self->acceleration.y = 0;
+	}
 
 	player_level_up(self);
 
+	//gfc_vector2d_add(self->position, self->velocity, self->position);
+
+
+}
+
+void player_think(Entity* self)
+{
+	
+	if (!self) return;
+	//GFC_Vector2D velocity;
+	player_move(self);
 }
 
 void player_update(Entity* self)
@@ -232,6 +237,7 @@ void player_update(Entity* self)
 	player_status(self);
 	camera_center_on(self->position);
 	//slog("Health is: %f", self->health);
+	self->gravity = 5;
 
 
 }
@@ -589,7 +595,6 @@ float get_player_health()
 	return player_system.playerData->health;
 }
 
-void player_health_check()
-{
 
-}
+
+

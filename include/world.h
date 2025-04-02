@@ -18,6 +18,14 @@ typedef struct
 	GFC_Rect		ground;
 }World;
 
+
+/**
+* @Brief load a new world from a config file
+* @Param filename the name of the world file to load
+* @return NULL on error, or a usable world otherwise
+*/
+World* world_load(const char* filename);
+
 /**
 * @brief Test function to see if world is working;
 */

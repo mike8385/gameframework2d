@@ -35,13 +35,16 @@ Entity* spell_new_entity(GFC_Vector2D position)
 	spell->magicType = MT_magic;
 	spell->damageDelt = 0;
 	spell->worldTime = SDL_GetTicks();
+	spell->spawnTime = SDL_GetTicks();
+	spell->lastAttackTime = SDL_GetTicks();
+	spell->TTL = 10000;
 	return spell;
 }
 
 void spell_move(Entity* self)
 {
 	if (!self) return;
-	slog("CollidedType: %d, MagicType: %d", self->collidedType, self->magicType);
+	//slog("CollidedType: %d, MagicType: %d", self->collidedType, self->magicType);
 
 	if ((self->collidedType == ETC_magic) && (self->magicType == MT_magic))
 	{
@@ -107,7 +110,7 @@ void spell_move(Entity* self)
 		{
 			if (self->spawnTime + 1050 <= self->worldTime) // Ensures the delay only occurs once
 			{
-				//slog("Monster Fast");
+				slog("Monster Fast");
 
 				Entity* spell2 = spell_new_entity(gfc_vector2d(self->position.x + 50, self->position.y));
 				spell2->magicType = MT_rapid;
@@ -150,6 +153,7 @@ void spell_update(Entity* self)
 	spell_type(self);
 
 	spell_world_collision(self);
+	update_entity_lifetime(self);
 }
 
 void spell_attack(Entity* self)
@@ -194,6 +198,10 @@ void spell_collision(Entity* self)
 	for (i = 0; i < gfc_list_count(list); ++i)
 	{
 		Entity* other = (Entity*)gfc_list_nth(list, i);
+		if (!other)
+		{
+			slog("Breoken");
+		}
 
 		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster) && (self->magicType == MT_magic))
 		{

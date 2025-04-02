@@ -19,17 +19,18 @@ Entity* end_boss_new_entity(GFC_Vector2D position)
 	self->think = end_boss_think;
 	self->update = end_boss_update;
 	self->sprite = gf2d_sprite_load_all(
-		"images/players/wizardSprites/PNG/wizard_fire/fbwizard_idle3.png",
+		"images/players/wizardSprites/PNG/wizard/wizard_idle3.png",
 		128,
 		128,
 		16,
 		0);
 	self->collidedType = ETC_monster;
 	self->magicCooldown = 0;
+	self->meleeCooldown = 0;
 	self->lastAttackTime = 0;
 	self->health = 100.0f;
 	new_status_assign(self);
-	self->velocity.x = 4;
+	self->velocity.x = -2;
 	self->velocity.y = 0;
 
 	return self;
@@ -47,15 +48,25 @@ void end_boss_move(Entity* self)
 	// Move the entity
 	gfc_vector2d_add(self->position, self->position, self->velocity);
 
-	//Reverse direction when hitting boundaries
-	if (self->position.x <= 400)
+	//
+	if (end_boss_see_player(self))
 	{
-		self->velocity.x = 3;  // Move right
+		self->velocity.x = -2;
 	}
-	else if (self->position.x >= 600)
+
+	if (self->position.x <= (playerBounds.x + playerBounds.w + (double)300))
 	{
-		self->velocity.x = -3; // Move left
+		if (self->position.y <= 200)
+		{
+			self->velocity.y = 2;  // Move right
+		}
+		else if (self->position.y >= 450)
+		{
+			self->velocity.y = -2; // Move left
+		}
+		self->velocity.x = 0;
 	}
+
 
 	//slog("Wizard Position: %f, Velocity: %f", self->position.x, self->velocity.x);
 }
@@ -130,6 +141,7 @@ void end_boss_attack(Entity* self)
 {
 	if (!self)return;
 	GFC_Rect playerBounds = get_player_bounds();
+	GFC_Rect worldBounds = get_world_bounds();
 	if (end_boss_see_player(self))
 	{
 
@@ -137,20 +149,33 @@ void end_boss_attack(Entity* self)
 		if (currentTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
 			self->magicCooldown = 0;
 		}
+		if (currentTime - self->lastAttackTimeMelee >= 3000) { // 3000 ms = 3 seconds
+			self->meleeCooldown = 0;
+		}
 		if (self->magicCooldown == 0)
 		{
 			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
 
 			spell->collidedType = ETC_monster_spell;
-			spell->magicType = MT_rapid;
-
+			spell->magicType = MT_magic;
+			if (self->position.x <= (playerBounds.x + playerBounds.w + (double)400)) spell->magicType = MT_freeze;
+			
 
 			spell_move(spell);
 			self->magicCooldown = 3;
-			self->lastAttackTime = currentTime;
+			self->lastAttackTime = currentTime;	
 		}
 
+		if (self->meleeCooldown == 0)
+		{
+			Entity* spell = spell_new_entity(gfc_vector2d(self->position.x + 2, self->position.y));
 
+			spell->collidedType = ETC_monster_spell;
+			spell->magicType = MT_fire;
+			spell_move(spell);
+			self->meleeCooldown = 3;
+			self->lastAttackTimeMelee = currentTime;
+		}
 
 
 	}

@@ -223,7 +223,6 @@ void entity_bounds_update(Entity* self)
 	GFC_Vector2D* poc = { 0 };
 	GFC_Vector2D* normal = { 0 };
 
-	gfc_rect_overlap_poc(self->bounds, worldBounds, poc, normal);
 	if (!gfc_point_in_rect(gfc_vector2d(self->bounds.x, self->bounds.y), worldBounds) || !gfc_point_in_rect(gfc_vector2d(self->bounds.x + self->bounds.w, self->bounds.y + self->bounds.h), worldBounds))//(gfc_rect_overlap_poc(self->bounds, world->bounds, poc, normal))//
 	{
 		if (self->bounds.x < worldBounds.x)
@@ -248,6 +247,7 @@ void entity_bounds_update(Entity* self)
 		if (self->bounds.y + self->bounds.h > worldBounds.y + worldBounds.h)
 		{
 			self->position.y = worldBounds.y + worldBounds.h - self->bounds.h;
+			self->onGround = 1;
 
 		}
 
@@ -260,9 +260,12 @@ void entity_move(Entity* self)
 {
 	if (!self) return;
 
-	if (self->move)self->move(self);
-	gfc_vector2d_add(self->position, self->position, self->velocity);
+	if (self->move) self->move(self);
+
 	gfc_vector2d_add(self->velocity, self->velocity, self->acceleration);
+
+	gfc_vector2d_add(self->position, self->position, self->velocity);
+
 
 
 }
@@ -324,8 +327,9 @@ GFC_List* entity_collide_all(Entity* self)
 void collision(Entity* self)
 {
 	if (!self) return;
-
+	slog("Collision");
 	if (self->collision)self->collision(self);
+	slog("Breaks?");
 
 }
 
