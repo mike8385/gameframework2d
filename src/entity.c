@@ -168,6 +168,7 @@ void entity_update(Entity* self)
 
 	
 	if (self->update)self->update(self);
+	entity_bounds_update(self);
 }
 
 void entity_attack(Entity* self)
@@ -220,9 +221,7 @@ void entity_bounds_update(Entity* self)
 */
 	if (!self) return;
 	GFC_Rect worldBounds = get_world_bounds();
-	GFC_Vector2D* poc = { 0 };
-	GFC_Vector2D* normal = { 0 };
-
+	//("New World Bounds: %f,%f,%f,%f", worldBounds.x, worldBounds.y, worldBounds.h, worldBounds.w);
 	if (!gfc_point_in_rect(gfc_vector2d(self->bounds.x, self->bounds.y), worldBounds) || !gfc_point_in_rect(gfc_vector2d(self->bounds.x + self->bounds.w, self->bounds.y + self->bounds.h), worldBounds))//(gfc_rect_overlap_poc(self->bounds, world->bounds, poc, normal))//
 	{
 		if (self->bounds.x < worldBounds.x)
@@ -251,7 +250,6 @@ void entity_bounds_update(Entity* self)
 
 		}
 
-		entity_update(self);
 	}
 
 }

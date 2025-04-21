@@ -165,7 +165,9 @@ void spell_attack(Entity* self)
 
 void spell_world_collision(Entity* self)
 {
+	//slog("slog before");
 	GFC_Rect worldBounds = get_world_bounds();
+	//slog("After");
 
 
 	if (self->bounds.x + self->bounds.w > worldBounds.x + worldBounds.w)

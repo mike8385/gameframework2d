@@ -4,18 +4,24 @@
 #include "gf2d_sprite.h"
 #include "gfc_shape.h"
 #include "gf2d_draw.h"
+#include "gfc_text.h"
 
 typedef struct
 {
+	GFC_TextLine name;
 	Sprite* background;				/**<Background image for the world*/
 	Sprite* tileLayer;
 	GFC_Rect		bounds;					/**<Bounds for the map*/
-	Sprite* tileSet;				/**Sprite containing tiles for the world<*/
-	Uint8* tileMap;				/**<The tiles that make up the world*/
+	Sprite*			tileSet;				/**Sprite containing tiles for the world<*/
+	Uint8*			tileMap;				/**<The tiles that make up the world*/
 	Uint32			tileHeight;				/**<How many tiles tall the map is*/
 	Uint32			tileWidth;				/**<How many tiles long the map is*/
 	Uint32			worldTime;
+	GFC_Vector2D	tileMapSize;
+	GFC_Vector2D	tileSize;
+
 	GFC_Rect		ground;
+	
 }World;
 
 
@@ -59,6 +65,17 @@ GFC_Rect get_world_bounds();
 void world_setup_camera(World* world);
 
 Uint32 get_world_time();
+
+void world_tile_layer(World* world);
+
+void world_tile_layer_build(World* world);
+
+/*
+* @brief save a world file
+*/
+void world_save(World* world, const char* filename);
+
+void world_clear_tileset(World* world);
 
 #endif
 

@@ -9,18 +9,7 @@
 #include "gfc_types.h"
 #include "gfc_shape.h"
 #include "world.h"
-
-
-//typedef enum
-//{
-//
-//} EntityTeamType;
-//
-//typedef enum
-//{
-//
-//}EntityCollisionLayers;
-
+#include "inventory.h";
 
 
 
@@ -62,6 +51,8 @@ typedef struct Entity_S
 	GFC_Vector2D			acceleration;
 	EntityTypeCollide		collidedType;
 	float					gravity;
+	Uint8					isPlayer;
+	Inventory				inventory;
 
 
 	float					magicCooldown;
@@ -103,9 +94,10 @@ typedef struct Entity_S
 	void (*free)(struct Entity_S* self);		/**<Function to clean up any custom allocated data*/
 	void (*collision)(struct Entity_S* self);		/**<Function to call damage*/
 	void* data;									/**<For ad hoc addition data for the entity*/
+	void* inven;								
 	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
 
-	Uint8			isPlayer;
+	
 	
 	//
 

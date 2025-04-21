@@ -92,10 +92,11 @@ void status_give_effect(Entity* self)// , Effects* status)
 {
 	if (!self) return;
 
-	slog("Applying status effect: Fire: %d, Freeze: %d, Damage: %f",
+	/*slog("Applying status effect: Fire: %d, Freeze: %d, Damage: %f",
 		self->statusEffects->fireEffect,
 		self->statusEffects->freezeEffect,
 		self->statusEffects->statusDamage);
+		*/
 
 	if (self->statusEffects->fireEffect)
 	{

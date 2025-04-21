@@ -1,0 +1,57 @@
+{
+	"items": [
+		{
+			"name": "health_potion",
+			"displayName": "Health Potion",
+			"sprite": {
+				"filename": "images/itemslist.png",
+				"frame": 1
+			},
+			"price": 100,
+			"type": "potion",
+			"health": 50,
+			"stackable": 1
+		},
+		{
+			"name": "waffle",
+			"displayName": "Waffle",
+			{
+				"filename": "images/food/food_tiles.png",
+				"frame": 0
+			},
+			"type": "food",
+			"health": 10
+		},
+		{
+			"name": "steak",
+			"displayName": "steak",
+			{
+				"filename": "images/food/food_tiles.png",
+				"frame": 1
+			},
+			"type": "food",
+			"health": 20
+		},
+		{
+			"name": "soup",
+			"displayName": "Soup",
+			{
+				"filename": "images/food/food_tiles.png",
+				"frame": 2
+			},
+			"type": "food",
+			"health": 30
+		},
+		{
+			"name": "tea",
+			"displayName": "Tea",
+			{
+				"filename": "images/food/food_tiles.png",
+				"frame": 3
+			},
+			"type": "food",
+			"health": 40
+		}
+	]
+
+}

@@ -12,21 +12,29 @@
 #include "melee.h"
 
 #include "status.h"
+#include "items.h"
 
 
 typedef struct {
-	Entity* playerData;
-	Stats* playerStats;
-
+	GFC_TextLine	classname;
+	Entity*			playerData;
+	Stats*			playerStats;
 }PlayerSystem;
+
+typedef struct
+{
+	Inventory			inventory;
+	GFC_TextLine		classname;
+
+}PlayerInventory;
 
 static PlayerSystem player_system = { 0 }; /**<Initalize a LOCAL global entity manager*/
 
 Entity* player_new_entity(GFC_Vector2D position)
 {
-	//gfc_input_init("config/my_input.cfg")
 	Entity *self;
-	//Pointer in data
+	Stats* data;
+	PlayerInventory* inven;
 	self = entity_new();
 	if (!self)
 	{
@@ -64,7 +72,6 @@ Entity* player_new_entity(GFC_Vector2D position)
 
 
 
-	Stats* data;
 	data = gfc_allocate_array(sizeof(Stats), 1);
 	if (data)
 	{
@@ -79,6 +86,13 @@ Entity* player_new_entity(GFC_Vector2D position)
 
 	new_status_assign(self);
 	self->isPlayer = 1;
+
+	inven = gfc_allocate_array(sizeof(PlayerInventory), 1);
+	if (inven)
+	{
+		self->inven = inven;
+		inventory_init(&inven->inventory);
+	}
 
 	player_system.playerData = self;
 	player_system.playerStats = self->data;
@@ -191,11 +205,12 @@ void player_move(Entity *self)
 	}
 	else if (self->onGround == 0)
 	{
+
 		float	jumpTime = 4000;
 		if (jumpTime >= 0)
 		{
 			jumpTime--;
-			slog("JumpTime: %f", jumpTime);
+			//slog("JumpTime: %f", jumpTime);
 		}
 
 			self->acceleration.y = 1;
@@ -511,17 +526,17 @@ void player_status(Entity* self)
 		float currentTime = SDL_GetTicks();
 		if (currentTime - self->lastDamageTime >= 200) // 1 second cooldown
 		{
-			slog("Burning");
+			//slog("Burning");
 			self->health -= self->statusEffects->statusDamage;
 			self->lastDamageTime = currentTime;
-			slog("HEalth: %f", self->health);
+			//slog("HEalth: %f", self->health);
 		}
 
 		if (currentTime - self->statusEffects->statusStart >= self->statusEffects->TTL_fire)
 		{
-			slog("Unburn");
+			//slog("Unburn");
 			self->statusEffects->fireEffect = 0;
-			slog("HEalth: %f", self->health);
+			//slog("HEalth: %f", self->health);
 
 		}
 	}
@@ -534,14 +549,14 @@ void player_status(Entity* self)
 		{
 			self->statusEffects->freezeEffect = 0;
 			self->velocity.x = -1; // Stay frozen
-			slog("Unfrozen");
+			//slog("Unfrozen");
 
 
 		}
 		else
 		{
 			self->velocity.x = 0; // Stay frozen
-			slog("Frozen");
+			//slog("Frozen");
 
 		}
 
@@ -563,10 +578,12 @@ self->data =NULL
 
 void player_free(Entity* self)
 {
+	Stats* data;	
+	PlayerInventory inven;
 	if ((!self) || (!self->data)) return;
-	Entity* data = self->data;
-	//gf2d_sprite_free(data->)
-	gf2d_sprite_free(data->sprite);
+	data = self->data;
+	//inventory_cleanup(data->inventory);
+	//gf2d_sprite_free(data->sprite);
 	free(self->data);
 	free(data);
 	self->data = NULL;
