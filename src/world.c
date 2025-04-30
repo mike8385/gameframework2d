@@ -10,6 +10,9 @@
 #include "items.h"
 
 
+size_t maxItems = (size_t)MAX_ITEMS;
+
+
 typedef struct {
 	World* worldData;
 	//U///int32 entity_max;
@@ -31,6 +34,7 @@ World* world_load(const char* filename)
 	int w = 0, h = 0;
 	int i, j;
 	const char* tileSet;
+	const char* itemList;
 	const char* background;
 	int frame_w, frame_h;
 	int frames_per_line;
@@ -127,6 +131,8 @@ World* world_load(const char* filename)
 	slog("frame_w: %d, frame_h: %d", frame_w, frame_h);
 	slog("w: %d, h: %d", w, h);
 	world->bounds = gfc_rect(0, 0, w * frame_w, h * frame_h);
+	//world->tileSet->frame_h = frame_h;
+
 
 	slog("After setting, world bounds: %f, %f, %f, %f", world->bounds.x, world->bounds.y, world->bounds.h, world->bounds.w);
 
@@ -141,10 +147,63 @@ World* world_load(const char* filename)
 	//	return;
 	//}
 	//slog("%s", item);
-	sj_free(json);
+	
 
 	slog("After setting, world bounds: %f, %f", world_system.worldData->bounds.h, world_system.worldData->bounds.w);
 
+	//Item stuff now:
+	SJson* itemsArray = sj_object_get_value(json, "items");
+	if (!itemsArray)
+	{
+		slog("No items array found");
+		return world;
+	}
+
+	if (itemsArray->sjtype != SJVT_Array)
+	{
+		slog("Items is not an array!");
+		return world;
+	}
+
+	int itemCount = sj_array_get_count(itemsArray);
+	SJson* itemData = NULL;
+	for (i = 0; i < itemCount; i++)
+	{
+		itemData = sj_array_get_nth(itemsArray, i);
+		if (!itemData) continue;
+
+		const char* itemName = sj_object_get_value_as_string(itemData, "name");
+		SJson* positionArray = sj_object_get_value(itemData, "position");
+		if (!itemName || !positionArray)
+		{
+			slog("Item missing name or position");
+			continue;
+		}
+
+		GFC_Vector2D position = { 0 };
+		sj_get_float_value(sj_array_get_nth(positionArray, 0), &position.x);
+		sj_get_float_value(sj_array_get_nth(positionArray, 1), &position.y);
+
+		Item* newItem = item_new(itemName);
+		if (!newItem)
+		{
+			slog("Failed to create item: %s", itemName);
+			continue;
+		}
+
+		newItem->position = position;
+		slog("Name: %s File: %s", newItem->name, newItem->filename);
+
+		//GFC_Vector2D pixel_position;
+		//pixel_position.x = position.x * world->tileSize.x;
+		//pixel_position.y = position.y * world->tileSize.y;
+
+		gfc_list_append(world->itemList, newItem);
+		items_place(newItem, position);
+	}
+
+
+	sj_free(json);
 	return world;
 
 }
@@ -160,45 +219,52 @@ Sprite* world_load_tilesets(const char* filename, Sint32 frameWidth, Sint32 fram
 		frameHeight,
 		framesPerLine,
 		1);
+
+	self->tileSize.x = frameWidth;
+	self->tileSize.y = frameHeight;
+	slog("Frame Width: %d, Frame Height: %d", frameWidth, frameHeight);
+
 }
 
 
 
-World* world_test_new()
-{
-	//Entity* fire_wizard;
-	
-	int i, j;
-	int width = 500, height = 500;
-	World* world;
-	world = world_new(width,height);
-	if (!world) return NULL;
-	slog("Here");
-	world->background = gf2d_sprite_load_image("images/backgrounds/battlegrounds/PNG/Battleground2/Pale/Battleground2.png");
-	world->tileSet = gf2d_sprite_load_all(
-		"images/backgrounds/tileset1.png",
-		64,
-		64,
-		1,
-		1);
-	for (i = 0; i < width; i++)
-	{
-		world->tileMap[i] = 1;
-		world->tileMap[i+(height-1)*width] = 1;
-	}
-	for (i = 0; i < height; i++)
-	{
-		world->tileMap[i*width] = 1;
-		world->tileMap[i*width + (height-1)] = 1;
-	}
-	slog("Here");
-	world->bounds = gfc_rect(0, 100, 10000, 500);
-	world_system.worldData = world;
-	slog("Here");
-	//world_tile_layer_build(world);
-	slog("Here");
-	return world;
-}
+//World* world_test_new()
+//{
+//	//Entity* fire_wizard;
+//	
+//	int i, j;
+//	int width = 500, height = 500;
+//	World* world;
+//	world = world_new(width,height);
+//	if (!world) return NULL;
+//	slog("Here");
+//	world->background = gf2d_sprite_load_image("images/backgrounds/battlegrounds/PNG/Battleground2/Pale/Battleground2.png");
+//	world->tileSet = gf2d_sprite_load_all(
+//		"images/backgrounds/tileset1.png",
+//		64,
+//		64,
+//		1,
+//		1);
+//
+//
+//	for (i = 0; i < width; i++)
+//	{
+//		world->tileMap[i] = 1;
+//		world->tileMap[i+(height-1)*width] = 1;
+//	}
+//	for (i = 0; i < height; i++)
+//	{
+//		world->tileMap[i*width] = 1;
+//		world->tileMap[i*width + (height-1)] = 1;
+//	}
+//	slog("Here");
+//	world->bounds = gfc_rect(0, 100, 10000, 500);
+//	world_system.worldData = world;
+//	slog("Here");
+//	//world_tile_layer_build(world);
+//	slog("Here");
+//	return world;
+//}
 
 /**
 * @brief allocate a new empty world
@@ -207,7 +273,7 @@ World* world_test_new()
 World* world_new(Uint32 width, Uint32 height)
 {
 	World* world;
-
+	
 	if ((!width) || (!height))
 	{
 		slog("Cannot make a world with zerp width and height");
@@ -226,9 +292,14 @@ World* world_new(Uint32 width, Uint32 height)
 	world->tileHeight = height;
 	world->tileWidth = width;
 	world->bounds = gfc_rect(0,0,width,height);
+	world->itemList = gfc_list_new();
+
+
 	world->worldTime = SDL_GetTicks();
 	slog("World created with width %i, height %i", width, height);
 	return world;
+
+
 
 }
 
@@ -288,7 +359,8 @@ void* world_draw(World* world)
 		}
 	}*/
 	
-	
+	UI_health_bar(gfc_rect(15, 15, 300, 75));
+
 }
 
 
@@ -339,12 +411,11 @@ void world_tile_layer_build(World* world)
 		gf2d_sprite_free(world->tileLayer);
 	}
 	world->tileLayer = gf2d_sprite_new();
-	slog("Here");
+	
 	world->tileLayer->surface = gf2d_graphics_create_surface(
 		world->tileWidth * world->tileSet->frame_w, 
 		world->tileHeight * world->tileSet->frame_h);
 	
-
 	world->tileLayer->frame_w = world->tileWidth * world->tileSet->frame_w;
 	world->tileLayer->frame_h = world->tileHeight * world->tileSet->frame_h;
 
@@ -393,6 +464,7 @@ void world_tile_layer(World* world)
 	Uint32 index;
 	Uint32 frame;
 	GFC_Vector2D position;
+
 	if (!world)
 	{
 		slog("No world found for tilestuff");
@@ -470,60 +542,153 @@ void world_tile_layer(World* world)
 void world_save(World* world, const char* filename)
 {
 	SJson* json;
+	SJson* world_json;
+	SJson* tileMapArray;
+	SJson* rowArray;
+	SJson* itemsArray;
+	SJson* itemObj;
+	Item* item;
+	int i, j;
+
 	if ((!filename) || (!world)) return;
-	json = sj_object_new();
-	if (!json)
-	{
-		slog("Failed to create new JSon");
-		return;
-	}
-	sj_object_insert(json, "name", sj_new_str(world->name));
+
+	json = sj_object_new();        // The full root object
+	world_json = sj_object_new();  // The "world" object
+	itemsArray = sj_array_new();   // The "items" array (separate)
+
+	// Save general world info
+	sj_object_insert(world_json, "name", sj_new_str(world->name));
 	if (world->background)
 	{
-		sj_object_insert(json, "background", sj_new_str(world->background->filepath));
-		//sj_object_insert(json, "backgroundFileFrameW", sj_new_Uint32(world->background->frame_w));
-		//sj_object_insert(json, "backgroundFileFrameH", sj_new_Uint32(world->background->frame_h));
+		sj_object_insert(world_json, "background", sj_new_str(world->background->filepath));
 	}
-	/*
-	Add the rest (has to be same name
-	*/
+	if (world->tileSet)
+	{
+		sj_object_insert(world_json, "tileSet", sj_new_str(world->tileSet->filepath));
+		sj_object_insert(world_json, "frame_w", sj_new_uint32(world->tileSet->frame_w));
+		sj_object_insert(world_json, "frame_h", sj_new_uint32(world->tileSet->frame_h));
+		sj_object_insert(world_json, "frames_per_line", sj_new_uint32(world->tileSet->frames_per_line));
+	}
 
+	// Save tilemap
+	tileMapArray = sj_array_new();
+	for (j = 0; j < world->tileHeight; j++)
+	{
+		rowArray = sj_array_new();
+		for (i = 0; i < world->tileWidth; i++)
+		{
+			int tileValue = world->tileMap[i + (j * world->tileWidth)];
+			sj_array_append(rowArray, sj_new_int(tileValue));
+		}
+		sj_array_append(tileMapArray, rowArray);
+	}
+	sj_object_insert(world_json, "tileMap", tileMapArray);
 
+	// Save each item
+	if (world->itemList)
+	{
+		for (i = 0; i < gfc_list_count(world->itemList); i++)
+		{
+			item = gfc_list_get_nth(world->itemList, i);
+			if (!item) continue;
 
+			itemObj = sj_object_new();
+			sj_object_insert(itemObj, "name", sj_new_str(item->name));
 
+			SJson* positionArray = sj_array_new();
+			sj_array_append(positionArray, sj_new_float(item->position.x));
+			sj_array_append(positionArray, sj_new_float(item->position.y));
+			sj_object_insert(itemObj, "position", positionArray);
+
+			sj_array_append(itemsArray, itemObj);
+		}
+	}
+
+	//Now attach "world" and "items" separately to the root
+	sj_object_insert(json, "world", world_json);
+	sj_object_insert(json, "items", itemsArray);
+
+	// Save file
 	sj_save(json, filename);
 	sj_free(json);
 }
 
 
 
-void world_clear_tileset(World* world)
+
+void world_clear_tile_layer(World* world)
 {
 	if (!world) return;
 	gf2d_sprite_free(world->tileLayer);
 	world->tileLayer = NULL;
 }
 
-//void world_set_tile(World* world, GFC_Vector2D point, Uint8 tile)
+void world_set_tile(World* world, GFC_Vector2D point, Uint8 tile)
+{
+	GFC_Vector2D location;
+	if ((!world) || (!world->tileMap) || (!world->tileSize.x) || (!world->tileSize.y)) return;
+	//From world space to tilespace
+	location.x = ((float)point.x / world->tileSize.x);
+	location.y = ((float)point.y / world->tileSize.y);
+	world->tileMap[world_get_tile_index_by_pos(world, location)] = tile;
+	world_clear_tile_layer(world);
+	world_tile_layer_build(world);
+
+}
+
+
+Uint8 world_get_tile_index_by_pos(World* world, GFC_Vector2D position)
+{
+	if ((!world) || (!world->tileMap)) return 0;
+	return (Uint32)position.y * (Uint32)world->tileWidth + (Uint32)position.x;
+}
+
+Uint8 get_tile_at(World* world, GFC_Vector2D position)
+{
+	if ((!world) || (!world->tileMap)) return 0;
+	return world->tileMap[(Uint32)position.y * (Uint32)world->tileWidth + (Uint32)position.x];
+}
+
+
+void world_set_item(World* world, GFC_Vector2D point, Item* item)
+{
+	GFC_Vector2D location;
+	GFC_Vector2D pixel_position;
+
+	if ((!world) || (!item))
+	{
+		slog("Dont have world or item to give");
+
+	}
+	//From world space to tilespace
+	location.x = ((float)point.x / world->tileSize.x);
+	location.y = ((float)point.y / world->tileSize.y);
+	item->position = location;
+	//Save the item name to list, and the location
+	if (gfc_list_get_count(world->itemList) >= maxItems)
+	{
+		slog("Too many items in world");
+		return;
+	}
+	gfc_list_append(world->itemList, item);
+	//world->itemList[item_g(world, location, item)] = tile;
+	pixel_position.x = location.x * world->tileSize.x;
+	pixel_position.y = location.y * world->tileSize.y;
+
+	//items_place(item, pixel_position);  //This fixes drawing it correctly
+
+	world_clear_tile_layer(world);
+	world_tile_layer_build(world);
+	items_place(item, pixel_position);
+}
+
+Uint8 world_get_item_pos(World* world, GFC_Vector2D position, Item* item)
+{
+	//if ((!world) || (!world->tileMap)) return 0;
+	//return (Uint32)position.y * (Uint32)world->tileWidth + (Uint32)position.x;
+}
+//Uint8 get_item_at(World* world, GFC_Vector2D position, Item* item)
 //{
-//	GFC_Vector2D location;
-//	if ((!world) || (!world->tileMap) || (!world->tileSize.x) || (!world->tileSize.y)) return;
-//	//From world space to tilespace
-//	location.x = ((float)point.x / world->tileSize.x);
-//	location.y = ((float)point.y / world->tileSize.y);
-//	world_get_tile_at(world, location);
-//
 //
 //}
 
-//Uint8 world_get_tile_index_by_pos(World* world, GFC_Vector2D position)
-//{
-//	if ((!world) || (!world->tileMap)) return 0;
-//	return 
-//}
-//{
-//	if not world or tileMap
-//		return tile
-//}
-//
-//get_tile_at

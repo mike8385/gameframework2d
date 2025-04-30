@@ -15,7 +15,7 @@
 		{
 			"name": "waffle",
 			"displayName": "Waffle",
-			{
+			"sprite": {
 				"filename": "images/food/food_tiles.png",
 				"frame": 0
 			},
@@ -24,8 +24,8 @@
 		},
 		{
 			"name": "steak",
-			"displayName": "steak",
-			{
+			"displayName": "Steak",
+			"sprite": {
 				"filename": "images/food/food_tiles.png",
 				"frame": 1
 			},
@@ -35,7 +35,7 @@
 		{
 			"name": "soup",
 			"displayName": "Soup",
-			{
+			"sprite": {
 				"filename": "images/food/food_tiles.png",
 				"frame": 2
 			},
@@ -45,7 +45,7 @@
 		{
 			"name": "tea",
 			"displayName": "Tea",
-			{
+			"sprite": {
 				"filename": "images/food/food_tiles.png",
 				"frame": 3
 			},
@@ -53,5 +53,4 @@
 			"health": 40
 		}
 	]
-
 }

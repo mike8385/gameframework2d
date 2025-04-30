@@ -20,8 +20,8 @@ Entity* melee_new_entity(GFC_Vector2D position)
 
 	melee->sprite = gf2d_sprite_load_all(
 		"images/players/wizardSprites/PNG/wizard/wizard_melee.png",
-		50,
-		50,
+		125,
+		125,
 		1,
 		0);
 	//melee->position = gfc_vector2d(melee->position.x + 3, self->position.y);

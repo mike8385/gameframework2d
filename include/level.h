@@ -12,6 +12,8 @@
 extern int process;
 extern int mx, my;
 extern float mf;
+extern const Uint8* keys;
+
 
 
 Sprite* sprite;
@@ -25,6 +27,7 @@ Entity* ice_wizard;
 Entity* fast_wizard;
 Entity* melee_wizard;
 Entity* boss_wizard;
+Entity* pinkMonster;
 GFC_Vector2D position;
 GFC_Vector2D monsterposition;
 GFC_Rect rectangle;
@@ -43,4 +46,9 @@ void level_main_draw();
 
 
 
+void level_editor();
+
+void level_editor_setup();
+
+void level_editor_free();
 #endif

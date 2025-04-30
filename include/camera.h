@@ -34,6 +34,8 @@ void camera_set_bounds(GFC_Rect bounds);
 
 void camera_center_on(GFC_Vector2D point);
 
+void camera_center_on_mouse();
+
 
 #endif
 

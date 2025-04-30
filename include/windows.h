@@ -20,24 +20,27 @@ typedef struct
 	GFC_Rect				size;
 	Sprite*					sprite;
 	GFC_List*				sprites;
+	GFC_List*				buttons;
 	GFC_Color				color;
 	GFC_TextBlock			text;
 
 }Window;
 
-//typedef struct
-//{
-//	Uint8					_inuse;						/**<Memory management flag*/
-//	GFC_TextLine			name;						/**<Name of the entity for debugging*/
-//	GFC_Vector2D			position;
-//	GFC_Rect				size;
-//	Sprite*					sprite;
-//	GFC_List*				sprites;
-//	GFC_Color				color;
-//	Uint8					isButton;
-//	Uint8					isHover;
-//
-//}Button;
+typedef struct
+{
+	Uint8					_inuse;						/**<Memory management flag*/
+	GFC_TextLine			name;						/**<Name of the entity for debugging*/
+	GFC_Rect				size;
+	Sprite* sprite;
+	GFC_List*				sprites;
+	GFC_List*				buttons;
+	GFC_Color				color;
+	GFC_TextBlock			text;
+
+
+}MainMenuWindow;
+
+
 
 
 Window* window_new();

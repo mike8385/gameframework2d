@@ -9,9 +9,12 @@
 typedef struct
 {
 	GFC_TextLine	name;
+	const char*		filename;
 	Sprite*			sprite;
 	int				count;
 	int				price;
+	GFC_Vector2D	position;
+	int				frame;
 }Item;
 
 /**
@@ -31,6 +34,14 @@ SJson* items_get_def_by_name(const char* name);
 Item* item_new(const char* name);
 
 void item_free(Item* item);
+
+void items_place(Item* self, GFC_Vector2D position);
+
+void item_draw(Item* self);
+
+void items_draw_all();
+
+void items_clear_all();
 
 
 #endif

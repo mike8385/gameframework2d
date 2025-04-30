@@ -9,8 +9,8 @@
 typedef struct
 {
 	GFC_TextLine name;
-	Sprite* background;				/**<Background image for the world*/
-	Sprite* tileLayer;
+	Sprite*			background;				/**<Background image for the world*/
+	Sprite*			tileLayer;
 	GFC_Rect		bounds;					/**<Bounds for the map*/
 	Sprite*			tileSet;				/**Sprite containing tiles for the world<*/
 	Uint8*			tileMap;				/**<The tiles that make up the world*/
@@ -19,6 +19,9 @@ typedef struct
 	Uint32			worldTime;
 	GFC_Vector2D	tileMapSize;
 	GFC_Vector2D	tileSize;
+
+	GFC_List		monsterList;
+	GFC_List*		itemList;
 
 	GFC_Rect		ground;
 	
@@ -75,7 +78,13 @@ void world_tile_layer_build(World* world);
 */
 void world_save(World* world, const char* filename);
 
-void world_clear_tileset(World* world);
+void world_clear_tile_layer(World* world);
+
+void world_set_tile(World* world, GFC_Vector2D point, Uint8 tile);
+
+Uint8 world_get_tile_index_by_pos(World* world, GFC_Vector2D position);
+
+Uint8 get_tile_at(World* world, GFC_Vector2D position);
 
 #endif
 

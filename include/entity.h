@@ -21,6 +21,8 @@ typedef enum
 	ETC_magic = 4,
 	ETC_monster = 5,
 	ETC_monster_spell = 6,
+	ETC_pets = 7,
+	ETC_pets_spell = 8,
 	ETC_MAX = 15
 } EntityTypeCollide;
 
@@ -47,6 +49,7 @@ typedef struct Entity_S
 	GFC_List				*sprites;
 	float					frame;						/**<for drawing the sprite*/
 	GFC_Vector2D			position;					/**<Were to draw it*/
+	GFC_Vector2D			spawn_position;
 	GFC_Vector2D			velocity;					/**<how we are moving*/
 	GFC_Vector2D			acceleration;
 	EntityTypeCollide		collidedType;
@@ -84,6 +87,8 @@ typedef struct Entity_S
 	float					lastDamageTime;
 
 	float					onGround;
+
+
 
 
 	void (*think)(struct Entity_S* self);		/**<Function to call to make decisions*/

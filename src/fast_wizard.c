@@ -29,8 +29,13 @@ Entity* fast_wizard_new_entity(GFC_Vector2D position)
 	self->lastAttackTime = 0;
 	self->health = 100.0f;
 	new_status_assign(self);
+
+	gfc_vector2d_copy(self->position, position);
+	gfc_vector2d_copy(self->spawn_position, position); // Save spawn point
 	self->velocity.x = 4;
 	self->velocity.y = 0;
+
+
 
 	return self;
 
@@ -42,23 +47,22 @@ void fast_wizard_move(Entity* self)
 {
 	if (!self) return;
 
-	GFC_Rect playerBounds = get_player_bounds();
+	float patrolDistance = 100; // How far left/right from spawn
 
-	// Move the entity
+	// Move
 	gfc_vector2d_add(self->position, self->position, self->velocity);
 
-	 //Reverse direction when hitting boundaries
-	if (self->position.x <= 400)
+	// Reverse direction when exceeding patrol range
+	if (self->position.x <= self->spawn_position.x - patrolDistance)
 	{
-		self->velocity.x = 3;  // Move right
+		self->velocity.x = fabs(self->velocity.x); // Move right
 	}
-	else if (self->position.x >= 600)
+	else if (self->position.x >= self->spawn_position.x + patrolDistance)
 	{
-		self->velocity.x = -3; // Move left
+		self->velocity.x = -fabs(self->velocity.x); // Move left
 	}
-
-	//slog("Wizard Position: %f, Velocity: %f", self->position.x, self->velocity.x);
 }
+
 
 
 void fast_wizard_think(Entity* self)

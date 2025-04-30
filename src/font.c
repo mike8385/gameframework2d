@@ -19,14 +19,14 @@ typedef struct
 typedef struct
 {
 	GFC_List* fonts;
-	GFC_List* recents;
+	//GFC_List* recents;
 	//TTF_Font * TTF_OpenFont(const char* file, int ptsize);
 }FontManager;
 
 static FontManager font_manager = { 0 };
 
 
-void font_cache_free(FontCache* cache);
+//void font_cache_free(FontCache* cache);
 
 
 void font_close()
@@ -44,14 +44,14 @@ void font_close()
 	}
 	gfc_list_delete(font_manager.fonts);
 
-	c = gfc_list_get_count(font_manager.recents);
-	for (i = 0; i < c; i++)
-	{
-		cache = gfc_list_get_nth(font_manager.recents, i);
-		if (!cache)continue;
-		font_cache_free(cache);
-	}
-	gfc_list_delete(font_manager.recents);
+	//c = gfc_list_get_count(font_manager.recents);
+	//for (i = 0; i < c; i++)
+	//{
+	//	cache = gfc_list_get_nth(font_manager.recents, i);
+	//	if (!cache)continue;
+	//	font_cache_free(cache);
+	//}
+	//gfc_list_delete(font_manager.recents);
 
 	memset(&font_manager, 0, sizeof(FontManager));
 	TTF_Quit();
@@ -69,7 +69,7 @@ void font_init()
 		return;
 	}
 	font_manager.fonts = gfc_list_new();
-	font_manager.recents = gfc_list_new();
+	//font_manager.recents = gfc_list_new();
 	//Error check here
 	for (i = 0; i < FS_MAX; i++)
 	{
@@ -84,68 +84,68 @@ void font_init()
 	atexit(font_close);
 }
 
-void font_cache_free(FontCache* cache)
-{
-	if (!cache)return;
-	if (cache->text)free(cache->text);
-	if (cache->texture)SDL_DestroyTexture(cache->texture);
-	free(cache);
-}
+//void font_cache_free(FontCache* cache)
+//{
+//	if (!cache)return;
+//	if (cache->text)free(cache->text);
+//	if (cache->texture)SDL_DestroyTexture(cache->texture);
+//	free(cache);
+//}
 
-void font_cleanup()
-{
-	Uint32 now;
-	int i, c;
-	FontCache* cache;
-	now = SDL_GetTicks();
-	c = gfc_list_get_count(font_manager.recents);
-	for (i = c - 1; i >= 0; i--)
-	{
-		cache = gfc_list_get_nth(font_manager.recents, i);
-		if (!cache) continue;
-		if (now > cache->timestamp + 1000)
-		{
-			font_cache_free(cache);
-			gfc_list_delete_nth(font_manager.recents, i);
-		}
-	}
-}
+//void font_cleanup()
+//{
+//	Uint32 now;
+//	int i, c;
+//	//FontCache* cache;
+//	now = SDL_GetTicks();
+//	c = gfc_list_get_count(font_manager.recents);
+//	for (i = c - 1; i >= 0; i--)
+//	{
+//		//cache = gfc_list_get_nth(font_manager.recents, i);
+//		//if (!cache) continue;
+//		if (now > cache->timestamp + 1000)
+//		{
+//			font_cache_free(cache);
+//			gfc_list_delete_nth(font_manager.recents, i);
+//		}
+//	}
+//}
 
-void font_add_recent(const char* text, FontStyles style, GFC_Color color, SDL_Texture* texture, GFC_Vector2D size)
-{
-	FontCache* cache;
-	size_t length;
+//void font_add_recent(const char* text, FontStyles style, GFC_Color color, SDL_Texture* texture, GFC_Vector2D size)
+//{
+//	FontCache* cache;
+//	size_t length;
+//
+//	if ((!text) || (!texture)) return;
+//	cache = gfc_allocate_array(sizeof(FontCache), 1);
+//	if (!cache)return;
+//	cache->texture = texture;
+//	gfc_vector2d_copy(cache->size, size);
+//	cache->style = style;
+//	length = strlen(text) + 1;
+//	cache->text = gfc_allocate_array(sizeof(char), length);
+//	strncpy(cache->text, text, length);
+//	cache->timestamp = SDL_GetTicks();
+//	gfc_color_copy(cache->color, color);
+//	gfc_list_append(font_manager.recents, cache);
+//}
 
-	if ((!text) || (!texture)) return;
-	cache = gfc_allocate_array(sizeof(FontCache), 1);
-	if (!cache)return;
-	cache->texture = texture;
-	gfc_vector2d_copy(cache->size, size);
-	cache->style = style;
-	length = strlen(text) + 1;
-	cache->text = gfc_allocate_array(sizeof(char), length);
-	strncpy(cache->text, text, length);
-	cache->timestamp = SDL_GetTicks();
-	gfc_color_copy(cache->color, color);
-	gfc_list_append(font_manager.recents, cache);
-}
-
-FontCache *font_get_recent(const char* text, FontStyles style, GFC_Color color)
-{
-	FontCache* cache;
-	int i, c;
-	if (!text) return NULL;
-	c = gfc_list_get_count(font_manager.recents);
-	for (i = 0; i < c; i++)
-	{
-		cache = gfc_list_get_nth(font_manager.recents, i);
-		if (!cache) continue;
-		if (gfc_strlcmp(text, cache->text) != 0)continue;
-		if (cache->style != style) continue;
-		if (!gfc_color_cmp(color, cache->color))continue;
-		return cache;
-	}
-}
+//FontCache *font_get_recent(const char* text, FontStyles style, GFC_Color color)
+//{
+//	FontCache* cache;
+//	int i, c;
+//	if (!text) return NULL;
+//	c = gfc_list_get_count(font_manager.recents);
+//	for (i = 0; i < c; i++)
+//	{
+//		cache = gfc_list_get_nth(font_manager.recents, i);
+//		if (!cache) continue;
+//		if (gfc_strlcmp(text, cache->text) != 0)continue;
+//		if (cache->style != style) continue;
+//		if (!gfc_color_cmp(color, cache->color))continue;
+//		return cache;
+//	}
+//}
 
 void font_draw_text(const char* text, FontStyles style, GFC_Color color, GFC_Vector2D position)
 {
@@ -154,10 +154,10 @@ void font_draw_text(const char* text, FontStyles style, GFC_Color color, GFC_Vec
 	SDL_Texture* texture;
 	SDL_Rect rect;
 	SDL_Color fg;
-	FontCache* cache;
+	//FontCache* cache;
 
 
-	cache = font_get_recent(text, style, color);
+	/*cache = font_get_recent(text, style, color);
 	if (cache)
 	{
 		rect.x = position.x;
@@ -170,7 +170,7 @@ void font_draw_text(const char* text, FontStyles style, GFC_Color color, GFC_Vec
 			&rect);
 		cache->timestamp = SDL_GetTicks();
 		return;
-	}
+	}*/
 
 	font = gfc_list_get_nth(font_manager.fonts, style);
 	if (!font)
@@ -207,6 +207,7 @@ void font_draw_text(const char* text, FontStyles style, GFC_Color color, GFC_Vec
 		NULL,
 		&rect);
 	SDL_FreeSurface(surface);
-	font_add_recent(text, style, color, texture, gfc_vector2d(rect.w, rect.h));
+	//font_add_recent(text, style, color, texture, gfc_vector2d(rect.w, rect.h));
 
  }
+

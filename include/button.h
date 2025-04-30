@@ -13,6 +13,17 @@
 
 
 
+typedef enum
+{
+	BT_def,
+	BT_NewGame,
+	BT_Continue,
+	BT_Exit,
+	BT_Load,
+	BT_Edit,
+	BT_MAX
+}ButtonType;
+
 typedef struct
 {
 	Uint8					_inuse;						/**<Memory management flag*/
@@ -20,12 +31,12 @@ typedef struct
 	GFC_TextLine			text;
 	GFC_Vector2D			position;
 	GFC_Rect				size;
-	Sprite* sprite;
-	GFC_List* sprites;
+	Sprite*					sprite;
+	GFC_List*				sprites;
 	GFC_Color				color;
 	Uint8					isButton;
 	Uint8					isHover;
-
+	ButtonType				type;
 
 }Button;
 
@@ -33,7 +44,9 @@ typedef struct
 
 Button* button_new();
 
-Button* main_menu_button(GFC_Rect size, GFC_Color color);
+//Button* main_menu_button(GFC_Rect size, GFC_Color color);
+
+Button* button_new_button_text(GFC_Vector2D position, GFC_Vector2D size, GFC_Color color, GFC_TextLine text);
 
 Button* button_new_button(GFC_Vector2D position, GFC_Vector2D size, GFC_Color color);
 
@@ -45,15 +58,21 @@ void button_system_clear_all();
 
 void button_free(Button* self);
 
-Uint8 button_hover_check(GFC_Rect button);
+Uint8 button_hover_check(Button* button);
 
-void button_draw_text(GFC_TextLine text);
+//void button_draw_text(GFC_TextLine text);
 
 void button_system_draw();
 
 void button_system_update();
 
 void button_update(Button* self);
+
+
+void button_system_think();
+
+void button_think(Button* self);
+
 
 
 void button_click_actions(Button* self);

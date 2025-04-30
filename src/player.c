@@ -19,6 +19,7 @@ typedef struct {
 	GFC_TextLine	classname;
 	Entity*			playerData;
 	Stats*			playerStats;
+	Uint8			hasPet;
 }PlayerSystem;
 
 typedef struct
@@ -96,6 +97,7 @@ Entity* player_new_entity(GFC_Vector2D position)
 
 	player_system.playerData = self;
 	player_system.playerStats = self->data;
+	player_system.hasPet = 0;
 	
 	return self;
 }

@@ -22,6 +22,7 @@
 #include "items.h"
 #include "windows.h"
 #include "button.h"
+#include "pets.h"
 
 
 
@@ -34,19 +35,22 @@
 
 Uint8 _DRAWBOUNDS_ = 0;
 int process = 0;
+int done = 0;
+const Uint8* keys;
+
+
 
 //extern World* world;
 
 int main(int argc, char* argv[])
 {
     /*variable declarations*/
-    int done = 0;
     const Uint8* keys;
     //Sprite* sprite;
     //World* world;
     //Window* window;
 
-    //int mx, my;
+    int mx, my;
     float mf = 0;
     Sprite* mouse;
     GFC_Color mouseGFC_Color = gfc_color8(255, 100, 255, 200);
@@ -85,6 +89,7 @@ int main(int argc, char* argv[])
     camera_set_size(gfc_vector2d(1200, 720));
 
     gfc_config_def_init();
+    items_initalize("def/item.def");
 
     //gfc_config_def_load("def/spray_particle.def");
 
@@ -117,7 +122,7 @@ int main(int argc, char* argv[])
         gfc_input_update();
      //   SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
-        font_cleanup();
+        //font_cleanup();
         /*update things here*/
 
         //SDL_GetMouseState(&mx, &my);  // <-- add this
@@ -143,6 +148,9 @@ int main(int argc, char* argv[])
         case 1:
               level_process();
               break;
+        case 2:
+            level_editor();
+            break;
         default:
               level_main_menu();
               break;
@@ -156,6 +164,7 @@ int main(int argc, char* argv[])
 
         game_draw();
         
+        //slog("Runnning");
         //gf2d_graphics_clear_screen();// clears drawing buffers
         //// all drawing should happen betweem clear_screen and next_frame
         //    //backgrounds drawn first
@@ -165,6 +174,16 @@ int main(int argc, char* argv[])
         //   // window_draw(window);
         //    button_system_draw();
 
+        if (process == 2)
+        {
+            SDL_GetMouseState(&mx, &my);
+            if (SDL_GetMouseState(&mx, &my))
+            {
+                //particles_from_file("def/spray_particle.def", 100, gfc_vector2d(mx, my), gfc_vector2d(1, -1), gfc_vector2d(0, 0.1));
+                //world
+
+            }
+        }
 
         //    //gf2d_draw_rect(rectangle, GFC_COLOR_DARKYELLOW);
         //    //gf2d_draw_rect(player->bounds, GFC_COLOR_RED);
@@ -185,7 +204,21 @@ int main(int argc, char* argv[])
 
        // gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
         
-        if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
+        if (keys[SDL_SCANCODE_ESCAPE])
+        {
+            switch (process) {
+            case 1:
+                level_free();
+                break;
+            case 2:
+                level_editor_free();
+                break;
+            default:
+                slog("Nothing assigned, this is default");
+            }
+            process = 0; // exit condition
+
+        }
 
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
     }
@@ -221,4 +254,10 @@ Mix chunks
 Full background music
 LoadWAV - Load a WAV file and convert into a mixed chunk handle (Must free) [WAVE, AIFF, RIFF, OGG, VOC)
 -1 means idc pick a new channel
+*/
+
+/*
+
+Vector2D(x, y* .5% + z-1 *.5)
+
 */

@@ -67,6 +67,7 @@ void end_boss_move(Entity* self)
 		self->velocity.x = 0;
 	}
 
+	self->velocity.x = 0;
 
 	//slog("Wizard Position: %f, Velocity: %f", self->position.x, self->velocity.x);
 }
@@ -112,19 +113,13 @@ void end_boss_damage(Entity* self)
 
 Uint8 end_boss_see_player(Entity* self)
 {
-	if (!self) return;
-	GFC_Vector2D playerPosition = get_player_position();
-	GFC_Rect playerBounds = get_player_bounds();
+	if (!self) return 0;
 
-	if (self->position.x <= (playerBounds.x + playerBounds.w + (double)400))
-	{
-		//slog("I can see you!!");
-		return 1;
-	}
+	GFC_Vector2D playerPos = get_player_position();
+	float distance = fabs(self->position.x - playerPos.x);
 
-	if (self->position.x <= (playerBounds.x - playerBounds.w - (double)400))
+	if (distance <= 500)  // only "see" player if within 500px
 	{
-		//slog("I can see you!!");
 		return 1;
 	}
 

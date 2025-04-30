@@ -2,9 +2,16 @@
 #include "simple_logger.h"
 #include "simple_json.h"
 #include "items.h"
+#include "gf2d_sprite.h"
+#include "gfc_vector.h"
+#include "camera.h"
 
 static SJson* _itemJson = NULL;
 static SJson* _itemsDefs = NULL;
+
+#define MAX_ITEMS 128
+static Item* placedItems[MAX_ITEMS] = { 0 };
+
 
 void items_close();
 
@@ -72,19 +79,47 @@ SJson* items_get_def_by_name(const char* name)
 
 Item* item_new(const char* name)
 {
-	SJson* itemDef;
 	Item* item;
+	SJson* itemDef;
+	SJson* spriteObj;
+	const char* spriteFile = NULL;
+
 	itemDef = items_get_def_by_name(name);
-	if (!itemDef) return NULL;
-	item = gfc_allocate_array(sizeof(item), 1);
-	if (!item)return NULL;
+	if (!itemDef)
+	{
+		slog("Item definition not found: %s", name);
+		return NULL;
+	}
+
+	item = gfc_allocate_array(sizeof(Item), 1);
+	if (!item) return NULL;
 	gfc_line_cpy(item->name, name);
 	sj_object_get_value_as_int(itemDef, "price", &item->price);
-	//Get otehr relevant values (default values)
-	//Load sprite here
+
+	spriteObj = sj_object_get_value(itemDef, "sprite");
+	if (spriteObj)
+	{
+		item->filename = sj_object_get_value_as_string(spriteObj, "filename");
+		sj_object_get_value_as_int(spriteObj, "frame", &item->frame);
+
+		if (item->filename)
+		{
+			item->sprite = gf2d_sprite_load_all(item->filename, 64, 64, 4, 0);
+		}
+		else
+		{
+			slog("Sprite filename missing for item: %s", name);
+		}
+	}
+	else
+	{
+		slog("No sprite object found for item: %s", name);
+	}
+
 	item->count = 1;
 	return item;
 }
+
 
 void item_free(Item* item)
 {
@@ -93,3 +128,71 @@ void item_free(Item* item)
 	free(item);
 }
 
+
+
+void items_place(Item* self, GFC_Vector2D position)
+{
+	if (!self) return;
+
+	self->position = position;
+
+	// Add to global list
+	for (int i = 0; i < MAX_ITEMS; i++)
+	{
+		if (!placedItems[i])
+		{
+			placedItems[i] = self;
+			break;
+		}
+	}
+}
+
+void items_draw_all()
+{
+	for (int i = 0; i < MAX_ITEMS; i++)
+	{
+		if (placedItems[i])
+		{
+			item_draw(placedItems[i]);
+		}
+	}
+}
+
+
+void item_draw(Item* self)
+{
+	if (!self || !self->sprite) return;
+	GFC_Vector2D offset, position;
+	offset = camera_get_offset();
+
+	gfc_vector2d_add(position, self->position, offset);
+	gf2d_sprite_draw(
+		self->sprite,
+		position,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		(int)self->frame);
+
+	//slog("Item->position: %f, %f", self->position.x, self->position.y);
+}
+
+
+void items_clear_all()
+{
+	for (int i = 0; i < MAX_ITEMS; i++)
+	{
+		if (placedItems[i])
+		{
+			item_free(placedItems[i]);  // Free the item memory
+			placedItems[i] = NULL;      // Clear the slot
+		}
+	}
+}
+
+//size_t item_get_max()
+//{
+//	return MAX_ITEMS;
+//}
