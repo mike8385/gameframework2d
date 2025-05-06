@@ -6,6 +6,8 @@
 #include "gf2d_draw.h"
 #include "gfc_input.h"
 
+#include "commands.h"
+
 #include "font.h"
 
 #include "camera.h"
@@ -36,6 +38,7 @@
 Uint8 _DRAWBOUNDS_ = 0;
 int process = 0;
 int done = 0;
+int currentLevel = 0;
 const Uint8* keys;
 
 
@@ -119,6 +122,7 @@ int main(int argc, char* argv[])
     /*main game loop*/
     while (!done)
     {
+        cmds();
         gfc_input_update();
      //   SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
@@ -151,10 +155,26 @@ int main(int argc, char* argv[])
         case 2:
             level_editor();
             break;
+        //case 3:
+        //    level_transition();
+        //    break;
+        //case 4:
+        //    level2_process();
+        //    
         default:
               level_main_menu();
               break;
         }
+
+            SDL_GetMouseState(&mx, &my);
+            //if (SDL_GetMouseState(&mx, &my))
+            //{
+            //    particles_from_file("def/spray_particle.def", 100, gfc_vector2d(mx, my), gfc_vector2d(1, -1), gfc_vector2d(0, 0.1));
+
+            //}
+        
+
+
 
         /*
         int scene = 0;        
@@ -174,16 +194,7 @@ int main(int argc, char* argv[])
         //   // window_draw(window);
         //    button_system_draw();
 
-        if (process == 2)
-        {
-            SDL_GetMouseState(&mx, &my);
-            if (SDL_GetMouseState(&mx, &my))
-            {
-                //particles_from_file("def/spray_particle.def", 100, gfc_vector2d(mx, my), gfc_vector2d(1, -1), gfc_vector2d(0, 0.1));
-                //world
 
-            }
-        }
 
         //    //gf2d_draw_rect(rectangle, GFC_COLOR_DARKYELLOW);
         //    //gf2d_draw_rect(player->bounds, GFC_COLOR_RED);
@@ -219,6 +230,8 @@ int main(int argc, char* argv[])
             process = 0; // exit condition
 
         }
+
+
 
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
     }

@@ -74,7 +74,9 @@ Button* button_new_button_text(GFC_Vector2D position, GFC_Vector2D size, GFC_Col
 	but->position = position;
 	but->size = gfc_rect(position.x, position.y, size.x, size.y);  // Apply position to rectangle
 	gfc_vector2d_copy(but->position, position);
+	but->currentColor = color;
 	but->color = color;
+	but->hoverColor = GFC_COLOR_GREEN;
 	but->isHover = 0;
 	but->isButton = 1;
 	but->type = BT_def;
@@ -94,7 +96,9 @@ Button* button_new_button(GFC_Vector2D position, GFC_Vector2D size, GFC_Color co
 	but->position = position;
 	but->size = gfc_rect(position.x, position.y, size.x, size.y);  // Apply position to rectangle
 	gfc_vector2d_copy(but->position, position);
+	but->currentColor = color;
 	but->color = color;
+	but->hoverColor = GFC_COLOR_GREEN;
 	but->isHover = 0;
 	but->isButton = 1;
 	but->type = BT_def;
@@ -163,11 +167,12 @@ Uint8 button_hover_check(Button* button)
 
 		if (gfc_point_in_rect(gfc_vector2d(mx, my), button->size))
 		{
-
+			button->currentColor = button->hoverColor;
 			return 1;
 		}
 		else
 		{
+			button->currentColor = button->color;
 			return 0;
 		}
 }
@@ -182,7 +187,7 @@ void button_system_draw()
 
 
 		// Draw the button background
-		gf2d_draw_rect_filled(b->size, b->color);
+		gf2d_draw_rect_filled(b->size, b->currentColor);
 
 
 		// Draw the button text if it exists
@@ -258,5 +263,56 @@ void button_click_actions(Button* self)
 			slog("Button Clicked");
 			slog ("%d", self->isHover);
 		}
+	}
+}
+
+
+Button* button_new_button_text_named(GFC_Vector2D position, GFC_Vector2D size, GFC_Color color, GFC_TextLine text, const char* name)
+{
+	Button* but;
+	but = button_new();
+	but->position = position;
+	but->size = gfc_rect(position.x, position.y, size.x, size.y);  // Apply position to rectangle
+	gfc_vector2d_copy(but->position, position);
+	but->currentColor = color;
+	but->hoverColor = GFC_COLOR_GREEN;
+	but->color = color;
+	but->isHover = 0;
+	but->isButton = 1;
+	but->type = BT_def;
+
+	if (text)
+	{
+		strcpy(but->text, text);
+	}
+	if (name)
+	{
+		strcpy(but->name, name);
+	}
+
+	if (gfc_list_get_count(button_system.button_list) <= button_system.button_max)
+	{
+		gfc_list_append(button_system.button_list, but);
+	}
+	else
+	{
+		slog("Error too many buttons");
+		return;
+	}
+
+
+	//slog("Button Init");
+	return but;
+}
+
+Button* button_get_by_name(const char* name)
+{
+	if (!name) return;
+	int i;
+	Button* button;
+	if (gfc_list_get_item_index(button_system.button_list, name))
+	{
+		i = gfc_list_get_item_index(button_system.button_list, name);
+		slog("Button found");
 	}
 }

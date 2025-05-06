@@ -13,7 +13,7 @@ extern int process;
 extern int mx, my;
 extern float mf;
 extern const Uint8* keys;
-
+extern int currentLevel;
 
 
 Sprite* sprite;
@@ -28,9 +28,11 @@ Entity* fast_wizard;
 Entity* melee_wizard;
 Entity* boss_wizard;
 Entity* pinkMonster;
+Entity* pet;
 GFC_Vector2D position;
 GFC_Vector2D monsterposition;
 GFC_Rect rectangle;
+
 
 /**
 * @brief The process to change the scene for each level

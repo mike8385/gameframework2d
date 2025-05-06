@@ -84,5 +84,18 @@ float get_player_health();
 
 void player_status(Entity* self);
 
+/*
+* @brief Gets the players data
+*/
+Entity* player_get_player();
+
+
+
+Uint8 get_player_pet();
+
+void player_update_pet(Uint8 bool);
+
+
+
 #endif
 #pragma once

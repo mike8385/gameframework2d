@@ -7,8 +7,9 @@
 
 #include "entity.h"
 
-
-
+extern int process;
+extern int setup;
+extern int currentLevel;
 /**
 * @brief spawn a new end_boss entity
 * @param position where to spawn it

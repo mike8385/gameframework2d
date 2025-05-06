@@ -104,7 +104,7 @@ Item* item_new(const char* name)
 
 		if (item->filename)
 		{
-			item->sprite = gf2d_sprite_load_all(item->filename, 64, 64, 4, 0);
+			item->sprite = gf2d_sprite_load_all(item->filename, 64, 64, 1, 0);
 		}
 		else
 		{

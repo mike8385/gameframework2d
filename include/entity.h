@@ -26,6 +26,13 @@ typedef enum
 	ETC_MAX = 15
 } EntityTypeCollide;
 
+/*
+* @brief A conversion for the string equivalent for collision types
+* @param The string to be converted
+* @note This is mostly used for the JSON
+*/
+EntityTypeCollide string_to_collision_type(const char* typeStr);
+
 typedef enum
 {
 	MT_magic = 1,
@@ -39,13 +46,34 @@ typedef enum
 typedef struct s_Effect Effects;
 
 
+typedef enum
+{
+	PT_None,
+	PT_Pink,
+	PT_Dude,
+	PT_Owl,
+	PT_Green,
+	PT_Ember,
+	PT_MAX
+}PetType;
+
+/*
+* @brief A conversion for the string equivalent for pet types
+* @param The string to be converted
+* @note This is mostly used for the JSON
+*/
+PetType string_to_pet_type(const char* typeStr);
+
+
 typedef struct Entity_S
 {
 	Uint8					_inuse;						/**<Memory management flag*/
 	GFC_TextLine			name;						/**<Name of the entity for debugging*/
+	const char*				filename;
 	GFC_Rect				bounds;						/**<Entity Bounds*/
 	GFC_Vector2D			ground;
 	Sprite*					sprite;						/**<Graphical representation of entity*/
+	Sprite*					shadow;
 	GFC_List				*sprites;
 	float					frame;						/**<for drawing the sprite*/
 	GFC_Vector2D			position;					/**<Were to draw it*/
@@ -56,7 +84,8 @@ typedef struct Entity_S
 	float					gravity;
 	Uint8					isPlayer;
 	Inventory				inventory;
-
+	Uint8					isFollowing;
+	PetType					hasPet;
 
 	float					magicCooldown;
 	float					fireMagicCooldown;
@@ -78,15 +107,21 @@ typedef struct Entity_S
 	float					TTL;
 	float					spawnTime;
 
-	float					lastJumpTime;
-
-	float					jumpCooldown;
 	float					health;
 	float					maxHealth;
 	float					damageDelt;
 	float					lastDamageTime;
 
+
+	float					lastJumpTime;
+	float					jumpVelocity;
+	float					isJumping;
+	float					jumpHeight;
+	float					jumpCooldown;
 	float					onGround;
+	float					z; //Z axis for jumping
+
+
 
 
 
@@ -102,7 +137,7 @@ typedef struct Entity_S
 	void* inven;								
 	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
 
-	
+	int count;
 	
 	//
 

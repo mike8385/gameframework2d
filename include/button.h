@@ -34,6 +34,8 @@ typedef struct
 	Sprite*					sprite;
 	GFC_List*				sprites;
 	GFC_Color				color;
+	GFC_Color				currentColor;
+	GFC_Color				hoverColor;
 	Uint8					isButton;
 	Uint8					isHover;
 	ButtonType				type;
@@ -79,5 +81,12 @@ void button_click_actions(Button* self);
 
 
 void button_think(Button* self);
+
+Button* button_new_button_text_named(GFC_Vector2D position, GFC_Vector2D size, GFC_Color color, GFC_TextLine text, const char* name);
+
+
+Button* button_get_by_name(const char* name);
+
+
 
 #endif

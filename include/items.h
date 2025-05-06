@@ -18,8 +18,8 @@ typedef struct
 }Item;
 
 /**
-* @Brief initialize and load item definitions
-* @params filename the json file containing item data
+* @brief initialize and load item definitions
+* @param filename the json file containing item data
 */
 void items_initalize(const char* filename);
 

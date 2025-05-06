@@ -14,6 +14,8 @@
 #include "UI.h"
 #include "items.h"
 #include "world.h"
+#include "particles.h"
+#include "pets.h"
 
 int setup = 0; //Initilizes if I need to set up the characters and game info.
 Sprite* sprite = NULL;
@@ -26,7 +28,8 @@ GFC_Color mouseGFC_Color;
 GFC_Vector2D camera;
 Uint32 mb;
 ///Item* items;
-
+Entity* pets;
+const char* current_item_name;
 
 
 void game_draw()
@@ -47,6 +50,9 @@ void game_draw()
         world_draw(world);          // if you're in the game
         entity_system_draw();       // draw player, monsters, etc
         items_draw_all();  // draw items after the world but before mouse
+        //button_system_update();
+        button_system_draw();       // draw buttons
+
 
         break;
     case 2:
@@ -55,6 +61,10 @@ void game_draw()
         items_draw_all();  // draw items after the world but before mouse
 
         break;
+    //case 3:
+    //    level_free();
+
+    //    break;
     default:
         window_draw(window);        // menu window
         button_system_draw();       // draw buttons
@@ -70,6 +80,9 @@ void game_draw()
         &mouseGFC_Color,
         (int)mf);
 
+    particle_system_draw();
+
+
     // End frame
     gf2d_graphics_next_frame();
 
@@ -82,7 +95,7 @@ void level_process()
 
     if (!setup)
     {
-
+        currentLevel++;
         level_setup();
         setup = 1;
     }
@@ -93,7 +106,11 @@ void level_process()
     //slog("Here");
 
     entity_system_update();
+
     entity_system_move();
+    button_system_think();
+    button_system_update();
+    //UI_stats_bar_update();
     //slog("Here");
     //entity_bounds_update(player);
 
@@ -107,6 +124,8 @@ void level_process()
 
 void level_setup()
 {
+    pets_initalize("def/pets.def");
+
     Item* items;
     //SJson* wjson;
    // const char* spriteImage;
@@ -121,6 +140,7 @@ void level_setup()
     
     //items = item_new("waffle");
     //items_place(items, gfc_vector2d(400, 700));
+    
 
     //world = world_test_new();
 
@@ -129,13 +149,24 @@ void level_setup()
     GFC_Rect rectangle = gfc_rect(100, 100, 1000, 500);
 
     player = player_new_entity(position);
+
+    pet = pets_new("green_monster");
+    pets_new_entity_placed(pet, gfc_vector2d(1500, 700));
+
+    pet = pets_new("ember_monster");
+    pets_new_entity_placed(pet, monsterposition);
+
     monster = monster_new_entity(monsterposition);
-    fire_wizard = fire_wizard_new_entity(gfc_vector2d(1500, 700));
-    ice_wizard = ice_wizard_new_entity(gfc_vector2d(2000, 700));
-    fast_wizard = fast_wizard_new_entity(gfc_vector2d(2500, 700));
-    melee_wizard = melee_wizard_new_entity(gfc_vector2d(1000, 700));
-    boss_wizard = end_boss_new_entity(gfc_vector2d(3200, 700));
-    pinkMonster = pets_new_entity(monsterposition);
+    //fire_wizard = fire_wizard_new_entity(gfc_vector2d(1500, 700));
+    //ice_wizard = ice_wizard_new_entity(gfc_vector2d(2000, 700));
+    //fast_wizard = fast_wizard_new_entity(gfc_vector2d(2500, 700));
+    //melee_wizard = melee_wizard_new_entity(gfc_vector2d(1000, 700));
+    //boss_wizard = end_boss_new_entity(gfc_vector2d(3200, 700));
+    /*pinkMonster = pets_new_entity(monsterposition);
+    pinkMonster->hasPet = PT_Pink;
+    slog("Pet count: %d", pinkMonster->count);*/
+    //UI_stats_bar();
+
 
 
    // slog("Here");
@@ -146,6 +177,7 @@ void level_free()
 {
     entity_system_clear_all(); // Clear all entities like player, monster, etc.
     items_clear_all();         // Clear all items like waffle
+    button_system_clear_all();
 
     // Set all entity pointers to NULL after clearing
     player = NULL;
@@ -163,6 +195,11 @@ void level_free()
     }
 
     setup = 0;
+}
+
+void level_transition()
+{
+    level_free();
 }
 
 
@@ -194,23 +231,53 @@ void level_editor()
         setup = 1;
     }
     // Handle mouse-based camera manually (no player update)
-    mb = SDL_GetMouseState(&mx, &my);
-    camera_center_on_mouse();
-    Item* items = item_new("waffle");
+    static int prev_mb = 0;  // Previous mouse button state
+    gfc_input_update();
 
+
+    mb = SDL_GetMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT);
+    camera_center_on_mouse();
+
+
+
+    const Uint8* keys = SDL_GetKeyboardState(NULL);
+    if (keys[SDL_SCANCODE_1]) current_item_name = "waffle";
+    if (keys[SDL_SCANCODE_2]) current_item_name = "steak";
+    if (keys[SDL_SCANCODE_3]) current_item_name = "soup";
+    if (keys[SDL_SCANCODE_4]) current_item_name = "tea";
+
+
+
+    // Add more as needed
+
+    // Place selected item when mouse button is clicked
+    if ((mb & SDL_BUTTON(SDL_BUTTON_LEFT)) && !(prev_mb & SDL_BUTTON(SDL_BUTTON_LEFT)))
+    {
+        camera = camera_get_position();
+        if (current_item_name)
+        {
+            GFC_Vector2D pos = gfc_vector2d(mx + camera.x, my + camera.y);
+            Item* new_item = item_new(current_item_name);
+            if (new_item)
+            {
+                world_set_item(world, pos, new_item);
+                slog("Placed item: %s at (%.1f, %.1f)", current_item_name, pos.x, pos.y);
+                slog("Filename: %s, Frame: %d", new_item->filename, new_item->frame);
+            }
+            else
+            {
+                slog("Failed to create item: %s", current_item_name);
+            }
+        }
+    }
+
+    
     // Allow placing tiles/items/buttons if you want
     button_system_think();
     button_system_update();
 
-    gfc_input_update();
+    prev_mb = mb; // Update previous state
 
-    if (mb)
-    {
-        camera = camera_get_position();
-        //world_set_tile(world, gfc_vector2d(mx + camera.x, my + camera.y),(mb & SDL_BUTTON(1))?1:0);
-        world_set_item(world, gfc_vector2d(mx + camera.x, my + camera.y), items);
-
-    }
 }
 
 
@@ -245,6 +312,7 @@ void level_editor_setup()
     //boss_wizard = end_boss_new_entity(gfc_vector2d(3200, 700));
 
     //world = world_test_new();
+    current_item_name = "";
 
 }
 

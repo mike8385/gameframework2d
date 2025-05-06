@@ -21,15 +21,38 @@ typedef struct {
 static EntitySystem entity_system = { 0 }; /**<Initalize a LOCAL global entity manager*/
 
 
-//void entity_system_close()
-//{
-//	entity_system_clear_all();
-//	if (entity_system.entity_list)
-//	{
-//		entity_system_free_all();
-//		free(entity_system.entity_list);
-//	}
-//}
+EntityTypeCollide string_to_pet_type(const char* typeStr) {
+	if (!typeStr) return PT_None; // Default
+
+	if (strcmp(typeStr, "PT_Pink") == 0) return PT_Pink;
+	if (strcmp(typeStr, "PT_Dude") == 0) return PT_Dude;
+	if (strcmp(typeStr, "PT_Owl") == 0) return PT_Owl;
+	if (strcmp(typeStr, "PT_Green") == 0) return PT_Green;
+	if (strcmp(typeStr, "PT_Ember") == 0) return PT_Ember;
+
+
+
+
+
+	slog("Unknown collision type: %s", typeStr);
+	return PT_None; // Default fallback
+}
+
+EntityTypeCollide string_to_collision_type(const char* typeStr) {
+	if (!typeStr) return ETC_entity; // Default
+
+	if (strcmp(typeStr, "ETC_entity") == 0) return ETC_entity;
+	if (strcmp(typeStr, "ETC_world") == 0) return ETC_world;
+	if (strcmp(typeStr, "ETC_other") == 0) return ETC_other;
+	if (strcmp(typeStr, "ETC_magic") == 0) return ETC_magic;
+	if (strcmp(typeStr, "ETC_monster") == 0) return ETC_monster;
+	if (strcmp(typeStr, "ETC_monster_spell") == 0) return ETC_monster_spell;
+	if (strcmp(typeStr, "ETC_pets") == 0) return ETC_pets;
+	if (strcmp(typeStr, "ETC_pets_spell") == 0) return ETC_pets_spell;
+
+	slog("Unknown collision type: %s", typeStr);
+	return ETC_entity; // Default fallback
+}
 
 void entity_system_close()
 {
@@ -80,11 +103,33 @@ void entity_json_use(const char* filename)
 
 void entity_draw(Entity* self)
 {
-	GFC_Vector2D offset, position;
+	GFC_Vector2D offset, position, shadowPosition;
+	//slog("Entites Drawn : %s", self->name);
+	//slog("Entites Sprite : %s", self->filename);
+
 	if (!self) return;
 	if (!self->sprite) return;
 	offset = camera_get_offset();
-	gfc_vector2d_add(position, self->position, offset),
+	gfc_vector2d_add(position, self->position, offset);
+	shadowPosition.x = self->ground.x - (128 / 2);
+	shadowPosition.y = self->ground.y; // 10px below feet
+
+	// Apply camera offset
+	gfc_vector2d_add(shadowPosition, shadowPosition, offset);
+	//gfc_vector2d_add(shadowPosition, self->ground, offset);
+	gf2d_sprite_draw(
+		self->shadow,
+		shadowPosition,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		1
+	);
+
+
+	position.y -= self->jumpHeight;
 	gf2d_sprite_draw(
 		self->sprite,
 		position,
@@ -228,12 +273,14 @@ void entity_bounds_update(Entity* self)
 		{
 			
 			self->position.x = worldBounds.x;
+			
 
 		}
 
 		if (self->bounds.y < worldBounds.y)
 		{
 			self->position.y = worldBounds.y;
+			//self->jumpHeight = worldBounds.y;
 
 		}
 
@@ -405,3 +452,5 @@ set self layer
 * delete (entites)
 *
 */
+
+

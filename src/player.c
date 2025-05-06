@@ -13,7 +13,7 @@
 
 #include "status.h"
 #include "items.h"
-
+#include "pets.h"
 
 typedef struct {
 	GFC_TextLine	classname;
@@ -53,6 +53,7 @@ Entity* player_new_entity(GFC_Vector2D position)
 		128,
 		4,
 		0);
+
 	self->magicCooldown = 0;
 	self->burstMagicCooldown = 0;
 	self->meleeCooldown = 0;
@@ -70,6 +71,9 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->damageDelt = 10;
 	self->lastDamageTime = 0;
 	self->onGround = 0;
+	self->jumpHeight = 0;
+	self->jumpVelocity = 0;
+	self->isJumping = 0;
 
 
 
@@ -98,6 +102,11 @@ Entity* player_new_entity(GFC_Vector2D position)
 	player_system.playerData = self;
 	player_system.playerStats = self->data;
 	player_system.hasPet = 0;
+	self->isFollowing = 0;
+	self->hasPet = PT_None;
+	self->shadow  = gf2d_sprite_load_all("images/shadow.png", 128, 64, 1, 0);
+	strcpy(self->name, "Player");
+
 	
 	return self;
 }
@@ -127,6 +136,8 @@ void player_move(Entity *self)
 		else
 		{
 			self->velocity.x = 3;
+			//self->velocity.x = 3 * 0.707; // 70% of normal speed
+			//self->velocity.y = -3 * 0.707; // Diagonal up-right
 
 
 		}
@@ -143,6 +154,8 @@ void player_move(Entity *self)
 		else
 		{
 			self->velocity.x = -3;
+			//self->velocity.x = -3 * 0.707; // 70% of normal speed
+			//self->velocity.y = 3 * 0.707; // Diagonal up-right
 
 		}
 		self->sprite = gf2d_sprite_load_all(
@@ -159,7 +172,7 @@ void player_move(Entity *self)
 
 
 	}
-	if (keys[SDL_SCANCODE_I])
+	if (keys[SDL_SCANCODE_W])
 	{
 
 		data = get_player_stats();
@@ -194,37 +207,46 @@ void player_move(Entity *self)
 
 	}
 
-
 	if ((gfc_input_command_pressed("jump")) && (self->onGround == 1))
 	{
-		
 		self->onGround = 0;
-		self->velocity.y = -3;
-		self->acceleration.y = -2;
-
-
-
-	}
-	else if (self->onGround == 0)
-	{
-
-		float	jumpTime = 4000;
-		if (jumpTime >= 0)
-		{
-			jumpTime--;
-			//slog("JumpTime: %f", jumpTime);
-		}
-
-			self->acceleration.y = 1;
-
-		
-		//self->acceleration.y = 1;
+		self->isJumping = 1;
+		self->jumpVelocity = 6.0f;
+		self->jumpHeight = 0;
 
 	}
-	else
-	{
-		//self->acceleration.y = 0;
-	}
+
+
+	//if ((gfc_input_command_pressed("jump")) && (self->onGround == 1))
+	//{
+	//	
+	//	self->onGround = 0;
+	//	self->velocity.y = -3;
+	//	self->acceleration.y = -2;
+
+
+
+	//}
+	//else if (self->onGround == 0)
+	//{
+
+	//	float	jumpTime = 4000;
+	//	if (jumpTime >= 0)
+	//	{
+	//		jumpTime--;
+	//		//slog("JumpTime: %f", jumpTime);
+	//	}
+
+	//		self->acceleration.y = 1;
+
+	//	
+	//	//self->acceleration.y = 1;
+
+	//}
+	//else
+	//{
+	//	//self->acceleration.y = 0;
+	//}
 
 	player_level_up(self);
 
@@ -247,14 +269,40 @@ void player_update(Entity* self)
 	self->frame += 0.05f;
 	//slog("Frame is: %f", self->frame);
 	if (self->frame >= 4) self->frame = 0;
-	self->ground = gfc_vector2d(self->position.x + (128 / 2), self->position.y + 128);
+	self->ground = gfc_vector2d(self->position.x + (self->bounds.w / 2), self->position.y + self->bounds.h-50);
 	self->bounds = gfc_rect(self->position.x, self->position.y, 128, 128);
 	player_attack(self);
 	self->worldTime = SDL_GetTicks();
 	player_status(self);
 	camera_center_on(self->position);
 	//slog("Health is: %f", self->health);
-	self->gravity = 5;
+	if (self->hasPet == PT_Owl)
+	{
+		self->gravity = 0.10f;
+
+	}
+	else
+	{
+		self->gravity = 0.15f;
+	}
+
+	//Jump Check
+	if (self->isJumping)
+	{
+		self->jumpVelocity -= self->gravity;
+		self->jumpHeight += self->jumpVelocity;
+		self->bounds.y -= self->jumpHeight;
+
+		// Check landing
+		if (self->jumpHeight <= 0)
+		{
+			self->jumpHeight = 0;
+			self->isJumping = false;
+			self->onGround = true;
+
+		}
+
+	}
 
 
 }
@@ -268,9 +316,23 @@ void player_attack(Entity* self)
 	Uint32 currentTime2 = SDL_GetTicks(); // Get current time in milliseconds
 	Stats* stats = get_player_stats();
 
-	if (self->worldTime - self->lastAttackTime >= 1000) { // 3000 ms = 3 seconds
-		self->magicCooldown = 0;
+
+	if (self->hasPet == PT_Pink)
+	{
+		if ((self->worldTime - self->lastAttackTime >= 500)) { // 3000 ms = 3 seconds
+			self->magicCooldown = 0;
+		}
+
 	}
+	else
+	{
+		if ((self->worldTime - self->lastAttackTime >= 1000)) { // 3000 ms = 3 seconds
+			self->magicCooldown = 0;
+		}
+	}
+
+
+
 
 	if (self->worldTime - self->lastAttackTimeBurst >= 5000) { // 5000 ms = 5 seconds
 		self->burstMagicCooldown = 0;
@@ -522,46 +584,50 @@ void player_status(Entity* self)
 
 
 	//slog("Freeze Effect: %d", self->statusEffects->freezeEffect);
-
-	if (self->statusEffects->fireEffect)
+	if (self->hasPet != PT_Ember)
 	{
-		float currentTime = SDL_GetTicks();
-		if (currentTime - self->lastDamageTime >= 200) // 1 second cooldown
+		if (self->statusEffects->fireEffect)
 		{
-			//slog("Burning");
-			self->health -= self->statusEffects->statusDamage;
-			self->lastDamageTime = currentTime;
-			//slog("HEalth: %f", self->health);
-		}
+			float currentTime = SDL_GetTicks();
+			if (currentTime - self->lastDamageTime >= 200) // 1 second cooldown
+			{
+				//slog("Burning");
+				self->health -= self->statusEffects->statusDamage;
+				self->lastDamageTime = currentTime;
+				//slog("HEalth: %f", self->health);
+			}
 
-		if (currentTime - self->statusEffects->statusStart >= self->statusEffects->TTL_fire)
-		{
-			//slog("Unburn");
-			self->statusEffects->fireEffect = 0;
-			//slog("HEalth: %f", self->health);
+			if (currentTime - self->statusEffects->statusStart >= self->statusEffects->TTL_fire)
+			{
+				//slog("Unburn");
+				self->statusEffects->fireEffect = 0;
+				//slog("HEalth: %f", self->health);
 
+			}
 		}
 	}
 
-
-	if (self->statusEffects->freezeEffect) // If frozen
+	if (self->hasPet != PT_Dude)
 	{
-
-		if (self->worldTime - self->statusEffects->statusStart >= self->statusEffects->TTL_freeze)
+		if (self->statusEffects->freezeEffect) // If frozen
 		{
-			self->statusEffects->freezeEffect = 0;
-			self->velocity.x = -1; // Stay frozen
-			//slog("Unfrozen");
 
+			if (self->worldTime - self->statusEffects->statusStart >= self->statusEffects->TTL_freeze)
+			{
+				self->statusEffects->freezeEffect = 0;
+				self->velocity.x = -1; // Stay frozen
+				//slog("Unfrozen");
+
+
+			}
+			else
+			{
+				self->velocity.x = 0; // Stay frozen
+				//slog("Frozen");
+
+			}
 
 		}
-		else
-		{
-			self->velocity.x = 0; // Stay frozen
-			//slog("Frozen");
-
-		}
-
 	}
 
 }
@@ -614,6 +680,26 @@ float get_player_health()
 	return player_system.playerData->health;
 }
 
+Entity* player_get_player()
+{
+	return player_system.playerData;
+}
+
+Uint8 get_player_pet()
+{
+	return player_system.hasPet;
+}
+
+void player_update_pet(Uint8 bool)
+{
+	if (!bool)
+	{
+		player_system.hasPet = 0;
+		return;
+	}
+
+	player_system.hasPet = 1;
+}
 
 
 

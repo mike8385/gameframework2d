@@ -11,7 +11,7 @@
 
 void UI_health_bar(GFC_Rect box);
 
-
+void UI_stats_bar();
 #endif
 
 #pragma once

@@ -1,0 +1,54 @@
+{
+	"pets": [
+		{
+			"name": "pink_monster",
+			"displayName": "Pink Monster",
+			"sprite": {
+				"filename": "images/pets/Pink_Monster/Pink_Monster_Idle_4.png",
+				"frame": 0
+			},
+			"type": "ETC_pets",
+			"petType": "PT_Pink"
+		},
+		{
+			"name": "dude_monster",
+			"displayName": "Dude Monster",
+			"sprite": {
+				"filename": "images/pets/Dude_Monster/Dude_Monster_Idle_4.png",
+				"frame": 0
+			},
+			"type": "ETC_pets",
+			"petType": "PT_Dude"
+		},
+		{
+			"name": "owl_monster",
+			"displayName": "Owl Monster",
+			"sprite": {
+				"filename": "images/pets/Owlet_Monster/Owlet_Monster_Idle_4.png",
+				"frame": 0
+			},
+			"type": "ETC_pets",
+			"petType": "PT_Owl"
+		},
+		{
+			"name": "green_monster",
+			"displayName": "Green Monster",
+			"sprite": {
+				"filename": "images/pets/Green_Monster/Green_Monster_Idle_4.png",
+				"frame": 0
+			},
+			"type": "ETC_pets",
+			"petType": "PT_Green"
+		},
+		{
+			"name": "ember_monster",
+			"displayName": "Ember Monster",
+			"sprite": {
+				"filename": "images/pets/Ember_Monster/Ember_Monster.png",
+				"frame": 0
+			},
+			"type": "ETC_pets",
+			"petType": "PT_Ember"
+		}
+	]
+}

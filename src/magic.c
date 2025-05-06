@@ -127,6 +127,13 @@ void spell_move(Entity* self)
 
 	}
 
+
+	if ((self->collidedType == ETC_pets_spell) && (self->magicType == MT_magic))
+	{
+		self->velocity = gfc_vector2d(5.0f, 0.f); //Default magic type
+
+	}
+
 }
 
 void spell_think(Entity* self)
@@ -202,10 +209,10 @@ void spell_collision(Entity* self)
 		Entity* other = (Entity*)gfc_list_nth(list, i);
 		if (!other)
 		{
-			slog("Breoken");
+			slog("Broken");
 		}
 
-		if ((self->collidedType == ETC_magic) && (other->collidedType == ETC_monster) && (self->magicType == MT_magic))
+		if ((self->collidedType == ETC_magic || self->collidedType == ETC_pets_spell) && (other->collidedType == ETC_monster) && (self->magicType == MT_magic))
 		{
 			
 			entity_damage(self, other);

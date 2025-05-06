@@ -6,6 +6,9 @@
 #include "magic.h"
 #include "status.h"
 
+
+
+
 Entity* end_boss_new_entity(GFC_Vector2D position)
 {
 	Entity* self;
@@ -107,6 +110,7 @@ void end_boss_damage(Entity* self)
 		//slog("Health: %d", self->health);
 
 	//	slog("Died");
+		currentLevel++;
 		entity_free(self);
 	}
 }

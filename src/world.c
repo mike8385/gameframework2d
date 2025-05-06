@@ -128,13 +128,13 @@ World* world_load(const char* filename)
 	sj_object_get_value_as_int(wjson, "frame_h", &frame_h);
 	sj_object_get_value_as_int(wjson, "frames_per_line", &frames_per_line);
 	world_load_tilesets(tileSet, frame_w, frame_h, frames_per_line, 1, world);
-	slog("frame_w: %d, frame_h: %d", frame_w, frame_h);
-	slog("w: %d, h: %d", w, h);
+	//slog("frame_w: %d, frame_h: %d", frame_w, frame_h);
+	//slog("w: %d, h: %d", w, h);
 	world->bounds = gfc_rect(0, 0, w * frame_w, h * frame_h);
 	//world->tileSet->frame_h = frame_h;
 
 
-	slog("After setting, world bounds: %f, %f, %f, %f", world->bounds.x, world->bounds.y, world->bounds.h, world->bounds.w);
+	//slog("After setting, world bounds: %f, %f, %f, %f", world->bounds.x, world->bounds.y, world->bounds.h, world->bounds.w);
 
 
 	//Works
@@ -149,7 +149,7 @@ World* world_load(const char* filename)
 	//slog("%s", item);
 	
 
-	slog("After setting, world bounds: %f, %f", world_system.worldData->bounds.h, world_system.worldData->bounds.w);
+	//slog("After setting, world bounds: %f, %f", world_system.worldData->bounds.h, world_system.worldData->bounds.w);
 
 	//Item stuff now:
 	SJson* itemsArray = sj_object_get_value(json, "items");
@@ -183,6 +183,8 @@ World* world_load(const char* filename)
 		GFC_Vector2D position = { 0 };
 		sj_get_float_value(sj_array_get_nth(positionArray, 0), &position.x);
 		sj_get_float_value(sj_array_get_nth(positionArray, 1), &position.y);
+		//slog("Loaded item %d: position=(%f, %f)", i, position.x, position.y);  // Check if values are correct
+
 
 		Item* newItem = item_new(itemName);
 		if (!newItem)
@@ -192,7 +194,7 @@ World* world_load(const char* filename)
 		}
 
 		newItem->position = position;
-		slog("Name: %s File: %s", newItem->name, newItem->filename);
+		//slog("Name: %s File: %s", newItem->name, newItem->filename);
 
 		//GFC_Vector2D pixel_position;
 		//pixel_position.x = position.x * world->tileSize.x;
@@ -222,7 +224,7 @@ Sprite* world_load_tilesets(const char* filename, Sint32 frameWidth, Sint32 fram
 
 	self->tileSize.x = frameWidth;
 	self->tileSize.y = frameHeight;
-	slog("Frame Width: %d, Frame Height: %d", frameWidth, frameHeight);
+	//slog("Frame Width: %d, Frame Height: %d", frameWidth, frameHeight);
 
 }
 
@@ -296,7 +298,7 @@ World* world_new(Uint32 width, Uint32 height)
 
 
 	world->worldTime = SDL_GetTicks();
-	slog("World created with width %i, height %i", width, height);
+	//slog("World created with width %i, height %i", width, height);
 	return world;
 
 
@@ -401,11 +403,10 @@ void world_tile_layer_build(World* world)
 	Uint32 frame;
 	GFC_Vector2D position;
 
-	slog("Here");
 	if (!world) return;
-	slog("Here");
+
 	if (!world->tileSet) return;
-	slog("Here");
+
 	if (world->tileLayer)
 	{
 		gf2d_sprite_free(world->tileLayer);
@@ -424,7 +425,7 @@ void world_tile_layer_build(World* world)
 		slog("Failed to create tileLayer Surface");
 		return;
 	}
-	slog("Here");
+	//slog("Here");
 
 	for (j = 0; j < world->tileHeight; j++)
 	{
@@ -447,14 +448,14 @@ void world_tile_layer_build(World* world)
 				world->tileLayer->surface);
 		}
 	}
-	slog("Here");
+	//slog("Here");
 	world->tileLayer->texture = SDL_CreateTextureFromSurface(gf2d_graphics_get_renderer(), world->tileLayer->surface);
 	if (!world->tileLayer->texture)
 	{
 		slog("Failed to convert world tile layer to texture");
 		return;
 	}
-	slog("TileSet: % s", world->tileSet->filepath);
+	//slog("TileSet: % s", world->tileSet->filepath);
 }
 
 
@@ -488,27 +489,27 @@ void world_tile_layer(World* world)
 		slog("Cannot  make new tileLayer");
 		return;
 	}
-	slog("Error");
+	//slog("Error");
 	world->tileLayer->surface = gf2d_graphics_create_surface(
 		world->tileWidth * world->tileSet->frame_w,
 		world->tileHeight * world->tileSet->frame_h);
-	slog("Error");
+	//slog("Error");
 	world->tileLayer->frame_w = world->tileWidth * world->tileSet->frame_w;
 	world->tileLayer->frame_h = world->tileHeight * world->tileSet->frame_h;
-	slog("Error");
+	//slog("Error");
 	if (!world->tileLayer->surface)
 	{
 		slog("failed to create tileLayer surface");
 		return;
 	}
-	slog("Error");
-	slog("world->tileHeight: %d", world->tileHeight);
+	//slog("Error");
+	//slog("world->tileHeight: %d", world->tileHeight);
 
 
-	slog("tileMap size: %d, tileHeight: %d, tileWidth: %d",
-		world->tileWidth * world->tileHeight,
-		world->tileHeight,
-		world->tileWidth);
+	////slog("tileMap size: %d, tileHeight: %d, tileWidth: %d",
+	//	world->tileWidth * world->tileHeight,
+	//	world->tileHeight,
+	//	world->tileWidth);
 
 	for (j = 0; j < world->tileHeight; j++)
 	{
