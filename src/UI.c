@@ -27,7 +27,7 @@ void UI_health_bar(GFC_Rect box)
 	if (playerHealth == 40.0f)
 	{
 		//slog("Health Update: %f", playerHealth);
-
+		//sprite = sprite
 		gf2d_sprite_free(sprite);
 		sprite = gf2d_sprite_load_image("images/UI/4health.png");
 		gf2d_sprite_draw_image(sprite, gfc_vector2d(box.x, box.y));

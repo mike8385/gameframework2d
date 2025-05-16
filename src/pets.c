@@ -166,13 +166,13 @@ void pets_new_entity_placed(Entity* self, GFC_Vector2D position)
 	}
 
 	gfc_vector2d_copy(self->position, position);
-	slog("%s", self->sprite->filepath);
+	//slog("%s", self->sprite->filepath);
 	self->think = pets_think;
 	self->update = pets_update;
 	self->isFollowing = 0;
 	new_status_assign(self);
-	slog("Pet %s placed", self->name);
-	slog("Pet location %f %f", self->position.x, self->position.y);
+	//slog("Pet %s placed", self->name);
+	//slog("Pet location %f %f", self->position.x, self->position.y);
 
 
 }
@@ -424,7 +424,7 @@ void pets_collision(Entity* pet)
             player->hasPet = pet->hasPet;
             pet->isFollowing = 1;
             player_update_pet(pet->hasPet);
-            slog("Player picked up pet: %d", pet->hasPet);
+            //slog("Player picked up pet: %d", pet->hasPet);
             break;
         }
         // If player has a different pet than this one
@@ -438,7 +438,7 @@ void pets_collision(Entity* pet)
                     placedPets[j]->hasPet == player->hasPet)
                 {
                     placedPets[j]->isFollowing = 0;
-                    slog("Stopped following pet: %d", placedPets[j]->hasPet);
+                    //slog("Stopped following pet: %d", placedPets[j]->hasPet);
                     break;
                 }
             }
@@ -447,7 +447,7 @@ void pets_collision(Entity* pet)
             player->hasPet = pet->hasPet;
             pet->isFollowing = 1;
             player_update_pet(pet->hasPet);
-            slog("Player now following pet: %d", pet->hasPet);
+            //slog("Player now following pet: %d", pet->hasPet);
             break;
         }
         // If player is colliding with their current pet that isn't following
@@ -455,7 +455,7 @@ void pets_collision(Entity* pet)
         {
             // Just resume following
             pet->isFollowing = 1;
-            slog("Resumed following pet: %d", pet->hasPet);
+            //slog("Resumed following pet: %d", pet->hasPet);
             break;
         }
     }

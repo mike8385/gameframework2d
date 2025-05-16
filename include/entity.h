@@ -13,6 +13,10 @@
 
 
 
+
+typedef struct s_Effect Effects;
+
+
 typedef enum
 {
 	ETC_entity = 1,
@@ -23,6 +27,7 @@ typedef enum
 	ETC_monster_spell = 6,
 	ETC_pets = 7,
 	ETC_pets_spell = 8,
+	ETC_Items = 9,
 	ETC_MAX = 15
 } EntityTypeCollide;
 
@@ -43,7 +48,8 @@ typedef enum
 	MT_MAX = 6
 } MagicType;
 
-typedef struct s_Effect Effects;
+MagicType string_to_magic_type(const char* typeStr);
+
 
 
 typedef enum
@@ -83,6 +89,9 @@ typedef struct Entity_S
 	EntityTypeCollide		collidedType;
 	float					gravity;
 	Uint8					isPlayer;
+	Uint8					isPlayer2;
+	Uint8					isBoss;
+	//PlayerInventory*		pinventory;
 	Inventory				inventory;
 	Uint8					isFollowing;
 	PetType					hasPet;
@@ -133,8 +142,13 @@ typedef struct Entity_S
 	void (*move)(struct Entity_S* self);		/**<Function to call to move*/
 	void (*free)(struct Entity_S* self);		/**<Function to clean up any custom allocated data*/
 	void (*collision)(struct Entity_S* self);		/**<Function to call damage*/
+	void (*status)(struct Entity_S* self);		/**<Function to call to move*/
+	void (*see_player)(struct Entity_S* self);		/**<Function to call damage*/
+	void (*track_player)(struct Entity_S* self);		/**<Function to call damage*/
+
+
 	void* data;									/**<For ad hoc addition data for the entity*/
-	void* inven;								
+	//void* inven;								
 	//int			(*collide)(struct Entity_S, *self, struct Entity_S *other, EntityCollisionType type);	
 
 	int count;
@@ -240,5 +254,17 @@ void update_entity_lifetime(Entity* self);
 void entity_damage(Entity* self, Entity* other);
 
 
+/**
+ * @brief Get the entity system's max count
+ * @return the maximum number of entities
+ */
+Uint32 entity_system_get_max();
+
+/**
+ * @brief Get a pointer to an entity by index
+ * @param index the entity index to retrieve
+ * @return pointer to the entity, NULL if invalid
+ */
+Entity* entity_system_get_entity(Uint32 index);
 
 #endif

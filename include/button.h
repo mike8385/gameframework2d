@@ -21,6 +21,7 @@ typedef enum
 	BT_Exit,
 	BT_Load,
 	BT_Edit,
+	BT_Multi,
 	BT_MAX
 }ButtonType;
 
@@ -42,7 +43,7 @@ typedef struct
 
 }Button;
 
-
+extern int multiplayer;
 
 Button* button_new();
 

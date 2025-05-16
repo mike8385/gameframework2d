@@ -68,6 +68,9 @@ void end_boss_attack(Entity* self);
 */
 void end_boss_status(Entity* self);
 
+void end_boss_free(Entity* self);
+
+
 
 #endif
 #pragma once

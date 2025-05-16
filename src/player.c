@@ -35,7 +35,7 @@ Entity* player_new_entity(GFC_Vector2D position)
 {
 	Entity *self;
 	Stats* data;
-	PlayerInventory* inven;
+	PlayerInventory* inventory;
 	self = entity_new();
 	if (!self)
 	{
@@ -70,7 +70,7 @@ Entity* player_new_entity(GFC_Vector2D position)
 	self->position = position;
 	self->damageDelt = 10;
 	self->lastDamageTime = 0;
-	self->onGround = 0;
+	self->onGround = 1;
 	self->jumpHeight = 0;
 	self->jumpVelocity = 0;
 	self->isJumping = 0;
@@ -92,20 +92,22 @@ Entity* player_new_entity(GFC_Vector2D position)
 	new_status_assign(self);
 	self->isPlayer = 1;
 
-	inven = gfc_allocate_array(sizeof(PlayerInventory), 1);
-	if (inven)
-	{
-		self->inven = inven;
-		inventory_init(&inven->inventory);
-	}
+	//self->pinventory = gfc_allocate_array(sizeof(PlayerInventory), 1);
+	//if (self->pinventory)
+	//{
+	//	inventory_init(&self->pinventory->inventory);
+	//}
 
-	player_system.playerData = self;
-	player_system.playerStats = self->data;
+	inventory_init(&self->inventory);
+
 	player_system.hasPet = 0;
 	self->isFollowing = 0;
 	self->hasPet = PT_None;
 	self->shadow  = gf2d_sprite_load_all("images/shadow.png", 128, 64, 1, 0);
 	strcpy(self->name, "Player");
+
+	player_system.playerData = self;
+	player_system.playerStats = self->data;
 
 	
 	return self;
@@ -261,6 +263,15 @@ void player_think(Entity* self)
 	if (!self) return;
 	//GFC_Vector2D velocity;
 	player_move(self);
+	player_use_items(self);
+	//if (inventory_get_item_by_name(&self->inventory, "waffle"))
+	//{
+	//	slog("Waffle");
+	//}
+	//else
+	//{
+	//	slog("No waffle");
+	//}
 }
 
 void player_update(Entity* self)
@@ -274,7 +285,15 @@ void player_update(Entity* self)
 	player_attack(self);
 	self->worldTime = SDL_GetTicks();
 	player_status(self);
-	camera_center_on(self->position);
+	//if (multiplayer)
+	//{
+	//	camera_center_on_two_players
+	//}
+	//else
+	//{
+	//	camera_center_on(self->position);
+	//}
+	
 	//slog("Health is: %f", self->health);
 	if (self->hasPet == PT_Owl)
 	{
@@ -291,8 +310,7 @@ void player_update(Entity* self)
 	{
 		self->jumpVelocity -= self->gravity;
 		self->jumpHeight += self->jumpVelocity;
-		self->bounds.y -= self->jumpHeight;
-
+		if (self->bounds.y != get_world_bounds().y)self->bounds.y -= self->jumpHeight;
 		// Check landing
 		if (self->jumpHeight <= 0)
 		{
@@ -660,6 +678,9 @@ void player_free(Entity* self)
 	
 }
 
+
+
+
 GFC_Rect get_player_bounds()
 {
 	return player_system.playerData->bounds;
@@ -702,4 +723,71 @@ void player_update_pet(Uint8 bool)
 }
 
 
+void player_use_items(Entity* self)
+{
 
+	const Uint8* keys = SDL_GetKeyboardState(NULL);
+
+
+	if (gfc_list_count(self->inventory.itemsList) == 0)
+	{
+		self->inventory.itemIndex = -1;
+		self->inventory.selectedItem = NULL;
+		//slog("No items");
+		return;
+	}
+
+
+
+	if ((gfc_input_command_pressed("plus")))
+	{
+		if ((gfc_list_get_count(self->inventory.itemsList)) == self->inventory.itemIndex)
+		{
+			self->inventory.itemIndex = 0;
+		}
+		else
+		{
+			self->inventory.itemIndex++;
+			self->inventory.selectedItem = gfc_list_get_nth(self->inventory.itemsList, self->inventory.itemIndex);
+		}
+
+		slog("Selected Item: %s, Selected Index: %d", self->inventory.selectedItem->name, self->inventory.itemIndex);
+	}
+
+	if ((gfc_input_command_pressed("minus")))
+	{
+		if (0 == self->inventory.itemIndex)
+		{
+			self->inventory.itemIndex = gfc_list_get_count(self->inventory.itemsList);
+		}
+		else
+		{
+			self->inventory.itemIndex--;
+			self->inventory.selectedItem = gfc_list_get_nth(self->inventory.itemsList, self->inventory.itemIndex);
+		}
+
+
+
+		slog("Selected Item: %s, Selected Index: %d", self->inventory.selectedItem->name, self->inventory.itemIndex);
+	}
+
+	if ((gfc_input_command_pressed("use")) && (self->inventory.selectedItem->type == potion))
+	{
+		self->health += 10;
+		gfc_list_delete_nth(self->inventory.itemsList, self->inventory.itemIndex);
+	}
+
+	//Mock up shop:
+
+
+	//if ((gfc_input_command_pressed("buy") && self->inventory.coins >=10))
+	//{
+	//	self->inventory.coins = self->inventory.coins  - 10;
+	//	inventory_add_item(&self->inventory, "health_potion");
+	//	slog("Bought potion");
+	//}
+
+
+
+
+}

@@ -5,12 +5,27 @@
 #include "gf2d_sprite.h"
 #include "gfc_vector.h"
 #include "camera.h"
+#include "player.h"
+#include "entity.h"
 
 static SJson* _itemJson = NULL;
 static SJson* _itemsDefs = NULL;
 
 #define MAX_ITEMS 128
 static Item* placedItems[MAX_ITEMS] = { 0 };
+
+
+ItemTypes string_to_item_type(const char* typeStr) {
+	if (!typeStr) return item_default; // Default
+
+	if (strcmp(typeStr, "potion") == 0) return potion;
+	if (strcmp(typeStr, "food") == 0) return food;
+	if (strcmp(typeStr, "coins") == 0) return coins;
+
+
+	slog("Unknown collision type: %s", typeStr);
+	return item_default; // Default fallback
+}
 
 
 void items_close();
@@ -83,6 +98,7 @@ Item* item_new(const char* name)
 	SJson* itemDef;
 	SJson* spriteObj;
 	const char* spriteFile = NULL;
+	const char* type;
 
 	itemDef = items_get_def_by_name(name);
 	if (!itemDef)
@@ -95,6 +111,14 @@ Item* item_new(const char* name)
 	if (!item) return NULL;
 	gfc_line_cpy(item->name, name);
 	sj_object_get_value_as_int(itemDef, "price", &item->price);
+	type = sj_object_get_value_as_string(itemDef, "type");
+	if (!type)
+	{
+		slog("%s missing 'type'", name);
+		return NULL;
+	}
+	item->type = string_to_item_type(type);
+
 
 	spriteObj = sj_object_get_value(itemDef, "sprite");
 	if (spriteObj)
@@ -130,18 +154,18 @@ void item_free(Item* item)
 
 
 
-void items_place(Item* self, GFC_Vector2D position)
+void items_place(Item* item, GFC_Vector2D position)
 {
-	if (!self) return;
+	if (!item) return;
 
-	self->position = position;
+	item->position = position;
 
 	// Add to global list
 	for (int i = 0; i < MAX_ITEMS; i++)
 	{
 		if (!placedItems[i])
 		{
-			placedItems[i] = self;
+			placedItems[i] = item;
 			break;
 		}
 	}
@@ -159,24 +183,28 @@ void items_draw_all()
 }
 
 
-void item_draw(Item* self)
+void item_draw(Item* item)
 {
-	if (!self || !self->sprite) return;
+	if (!item || !item->sprite) return;
 	GFC_Vector2D offset, position;
 	offset = camera_get_offset();
 
-	gfc_vector2d_add(position, self->position, offset);
+	gfc_vector2d_add(position, item->position, offset);
 	gf2d_sprite_draw(
-		self->sprite,
+		item->sprite,
 		position,
 		NULL,
 		NULL,
 		NULL,
 		NULL,
 		NULL,
-		(int)self->frame);
+		(int)item->frame);
 
-	//slog("Item->position: %f, %f", self->position.x, self->position.y);
+	item->bounds = gfc_rect(item->position.x, item->position.y, 64, 64);
+
+
+
+	//slog("Item->position: %f, %f", item->position.x, item->position.y);
 }
 
 
@@ -192,7 +220,105 @@ void items_clear_all()
 	}
 }
 
-//size_t item_get_max()
+void item_collision(Item* item)
+{
+	if (!item) return;
+
+	for (int i = 0; i < entity_system_get_max(); i++)
+	{
+		Entity* other = entity_system_get_entity(i);
+		if (!other) continue;
+		if (!other->isPlayer) continue;
+
+		Entity* player = other;
+
+		if (item_collision_check(item, player))
+		{
+			
+			//EVERYTHING WITH ITEMS HERE;
+			slog("Inside pickup");
+
+			if (item->type == potion) item_pickup(item, player);
+			if (item->type == coins) player->inventory.coins += 10;
+
+			// Remove from the world (placedItems array)
+			for (int i = 0; i < MAX_ITEMS; i++)
+			{
+				if (placedItems[i] == item)
+				{
+					placedItems[i] = NULL;  // Remove reference
+					item_free(item);       // Now safely free
+					break;
+				}
+			}
+		}
+
+
+
+		//}
+	}
+
+}
+
+
+Uint8 item_collision_check(Item* item, Entity* entity)
+{
+	if (!item) return;
+	if (!entity) return;
+	if (gfc_rect_overlap(item->bounds, entity->bounds))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+
+
+void items_collide_all()
+{
+	for (int i = 0; i < MAX_ITEMS; i++)
+	{
+		if (placedItems[i])
+		{
+			item_collision(placedItems[i]);
+
+		}
+	}
+}
+
+
+void item_pickup(Item* item, Entity* player)
+{
+	if (!item || !player) return;
+
+	// Add to inventory (creates a new copy)
+	inventory_add_item(&player->inventory, item->name);
+
+	
+}
+
+
+//GFC_List* item_collide_all(Item* item)
 //{
-//	return MAX_ITEMS;
+//
+//	if (!item) return;
+//	int i;
+//	GFC_List* entities;
+//	ItemTypes itemType = item->type;
+//
+//	entities = gfc_list_new();
+//	for (i = 0; i < entity_system.entity_max; ++i)
+//	{
+//		if (!entity_system.entity_list[i]._inuse) continue;	//Skip any active entities
+//		if (item == &entity_system.entity_list[i]) continue;	//Skip any active entities
+//		if (entity_collision_check(item, &entity_system.entity_list[i]))
+//		{
+//			gfc_list_append(entities, &entity_system.entity_list[i]);
+//		}
+//	}
+//	if (!gfc_list_count(entities))
+//	{
+//		gfc_list_delete(entities); return;
+//	}
+//	return entities;
 //}

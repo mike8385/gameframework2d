@@ -8,6 +8,7 @@
 #include "entity.h"
 #include "fire_wizard.h"
 #include "items.h"
+#include "pets.h"
 
 
 size_t maxItems = (size_t)MAX_ITEMS;
@@ -15,9 +16,11 @@ size_t maxItems = (size_t)MAX_ITEMS;
 
 typedef struct {
 	World* worldData;
-	//U///int32 entity_max;
-	//Entity* entity_list;
-}WorldSystem;
+	World* nextWorld;
+	char nextWorldFile[256];
+	Uint8 transitionRequested;  // Add this flag
+} WorldSystem;
+
 
 static WorldSystem world_system = { 0 }; /**<Initalize a LOCAL global entity manager*/
 
@@ -30,6 +33,7 @@ World* world_load(const char* filename)
 	SJson* wjson = NULL;
 	SJson* vertical, * horizontal;
 	SJson* item;
+	SJson* nextWorldFile;
 	int tile;
 	int w = 0, h = 0;
 	int i, j;
@@ -38,6 +42,7 @@ World* world_load(const char* filename)
 	const char* background;
 	int frame_w, frame_h;
 	int frames_per_line;
+	const char* nextWorld;
 
 
 	if (!filename)
@@ -117,6 +122,7 @@ World* world_load(const char* filename)
 		return NULL;
 	}
 	world->background = gf2d_sprite_load_image(background);
+	slog("Background: %s", world->background->filepath);
 
 	tileSet = sj_object_get_value_as_string(wjson, "tileSet");
 	if (!tileSet)
@@ -130,7 +136,7 @@ World* world_load(const char* filename)
 	world_load_tilesets(tileSet, frame_w, frame_h, frames_per_line, 1, world);
 	//slog("frame_w: %d, frame_h: %d", frame_w, frame_h);
 	//slog("w: %d, h: %d", w, h);
-	world->bounds = gfc_rect(0, 0, w * frame_w, h * frame_h);
+	world->bounds = gfc_rect(0, 500, w * frame_w, 450/*h * frame_h*/);
 	//world->tileSet->frame_h = frame_h;
 
 
@@ -140,16 +146,67 @@ World* world_load(const char* filename)
 	//Works
 	world_system.worldData = world;
 	world_tile_layer_build(world);
-	//item = item_new("waffle");
-	//if (!item)
-	//{
-	//	slog("No item found");
-	//	return;
-	//}
-	//slog("%s", item);
-	
+	slog("Here");
+	//Pet spawn:
+	SJson* petsArray = sj_object_get_value(json, "pets");
+	if (petsArray)
+	{
 
-	//slog("After setting, world bounds: %f, %f", world_system.worldData->bounds.h, world_system.worldData->bounds.w);
+
+
+		if (petsArray->sjtype != SJVT_Array)
+		{
+			slog("Pets is not an array!");
+			return world;
+		}
+
+		int petsCount = sj_array_get_count(petsArray);
+		SJson* petsData = NULL;
+		for (i = 0; i < petsCount; i++)
+		{
+			petsData = sj_array_get_nth(petsArray, i);
+			if (!petsData) continue;
+
+			const char* petsName = sj_object_get_value_as_string(petsData, "name");
+			SJson* positionArray = sj_object_get_value(petsData, "position");
+			if (!petsName || !positionArray)
+			{
+				slog("Pet missing name or position");
+				continue;
+			}
+
+			GFC_Vector2D position = { 0 };
+			sj_get_float_value(sj_array_get_nth(positionArray, 0), &position.x);
+			sj_get_float_value(sj_array_get_nth(positionArray, 1), &position.y);
+			//slog("Loaded pets %d: position=(%f, %f)", i, position.x, position.y);  // Check if values are correct
+
+
+			Entity* newPet = pets_new(petsName);
+			if (!newPet)
+			{
+				slog("Failed to create pets: %s", petsName);
+				continue;
+			}
+
+			newPet->position = position;
+
+			//slog("Name: %s File: %s", newItem->name, newItem->filename);
+
+			//GFC_Vector2D pixel_position;
+			//pixel_position.x = position.x * world->tileSize.x;
+			//pixel_position.y = position.y * world->tileSize.y;
+
+			gfc_list_append(world->petsList, newPet);
+			pets_new_entity_placed(newPet, position);
+		}
+	}
+	else
+	{
+	slog("No pets array found");
+	}
+
+	//Enemy Spawn:
+
 
 	//Item stuff now:
 	SJson* itemsArray = sj_object_get_value(json, "items");
@@ -203,6 +260,25 @@ World* world_load(const char* filename)
 		gfc_list_append(world->itemList, newItem);
 		items_place(newItem, position);
 	}
+
+	nextWorld = sj_object_get_value_as_string(wjson, "nextWorld"); // wjson is the "world" object
+	if (nextWorld)
+	{
+		strcpy(world_system.nextWorldFile, nextWorld);
+		slog("Next world set to: %s", world_system.nextWorldFile);
+
+
+	}
+	else
+	{
+
+		slog("No next world");
+		strcpy(world_system.nextWorldFile, "None");
+		sj_free(json);
+		return world;
+	}
+		
+		
 
 
 	sj_free(json);
@@ -278,7 +354,7 @@ World* world_new(Uint32 width, Uint32 height)
 	
 	if ((!width) || (!height))
 	{
-		slog("Cannot make a world with zerp width and height");
+		slog("Cannot make a world with zero width and height");
 		return NULL;
 	}
 
@@ -295,6 +371,9 @@ World* world_new(Uint32 width, Uint32 height)
 	world->tileWidth = width;
 	world->bounds = gfc_rect(0,0,width,height);
 	world->itemList = gfc_list_new();
+	world->petsList = gfc_list_new();
+	world->monsterList = gfc_list_new();
+
 
 
 	world->worldTime = SDL_GetTicks();
@@ -687,6 +766,12 @@ Uint8 world_get_item_pos(World* world, GFC_Vector2D position, Item* item)
 {
 	//if ((!world) || (!world->tileMap)) return 0;
 	//return (Uint32)position.y * (Uint32)world->tileWidth + (Uint32)position.x;
+}
+
+
+const char* world_get_next_world()
+{
+	return world_system.nextWorldFile;
 }
 //Uint8 get_item_at(World* world, GFC_Vector2D position, Item* item)
 //{

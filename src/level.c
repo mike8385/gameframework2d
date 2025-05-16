@@ -16,6 +16,7 @@
 #include "world.h"
 #include "particles.h"
 #include "pets.h"
+#include "player2.h"
 
 int setup = 0; //Initilizes if I need to set up the characters and game info.
 Sprite* sprite = NULL;
@@ -28,8 +29,12 @@ GFC_Color mouseGFC_Color;
 GFC_Vector2D camera;
 Uint32 mb;
 ///Item* items;
-Entity* pets;
+Entity*             pets;
+Entity*             playerTransition;
 const char* current_item_name;
+const char* filename;
+Uint8 transition_flag;
+
 
 
 void game_draw()
@@ -53,18 +58,17 @@ void game_draw()
         //button_system_update();
         button_system_draw();       // draw buttons
 
-
         break;
     case 2:
         world_draw(world);          // if you're in the game
         entity_system_draw();       // draw player, monsters, etc
         items_draw_all();  // draw items after the world but before mouse
-
         break;
-    //case 3:
-    //    level_free();
+    case 3:
+        level_process();
+        break;
+    case 4:
 
-    //    break;
     default:
         window_draw(window);        // menu window
         button_system_draw();       // draw buttons
@@ -101,6 +105,15 @@ void level_process()
     }
 
 
+    if (multiplayer)
+    {
+        camera_center_on_two_players(get_player_position(), get_player2_position());
+    }
+    else
+    {
+	    camera_center_on(player->position);
+    }
+
     //slog("Here");
     entity_system_think();
     //slog("Here");
@@ -110,6 +123,7 @@ void level_process()
     entity_system_move();
     button_system_think();
     button_system_update();
+    items_collide_all();
     //UI_stats_bar_update();
     //slog("Here");
     //entity_bounds_update(player);
@@ -124,9 +138,10 @@ void level_process()
 
 void level_setup()
 {
-    pets_initalize("def/pets.def");
+    
 
-    Item* items;
+
+    //Item* items;
     //SJson* wjson;
    // const char* spriteImage;
     
@@ -135,7 +150,10 @@ void level_setup()
 
     camera_set_size(gfc_vector2d(1200, 720));
     sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
-    world = world_load("maps/testworld.txt");
+    slog("filename: !!%s", filename);
+    world = world_load(filename);
+    //slog("Next World: %s", world_get_next_world()->background);
+    slog("Initalize again");
 
     
     //items = item_new("waffle");
@@ -144,24 +162,28 @@ void level_setup()
 
     //world = world_test_new();
 
-    GFC_Vector2D position = gfc_vector2d(100.0f, 700.0f);
+    position = gfc_vector2d(100.0f, 700.0f);
     GFC_Vector2D monsterposition = gfc_vector2d(700.0f, 700.0f);
     GFC_Rect rectangle = gfc_rect(100, 100, 1000, 500);
 
-    player = player_new_entity(position);
+    if (!transition_flag) player = player_new_entity(position);
+    if (multiplayer && !transition_flag)      player2 = player2_new_entity(gfc_vector2d(100.0f, 400.0f));
 
-    pet = pets_new("green_monster");
-    pets_new_entity_placed(pet, gfc_vector2d(1500, 700));
 
-    pet = pets_new("ember_monster");
-    pets_new_entity_placed(pet, monsterposition);
+    
 
-    monster = monster_new_entity(monsterposition);
-    //fire_wizard = fire_wizard_new_entity(gfc_vector2d(1500, 700));
-    //ice_wizard = ice_wizard_new_entity(gfc_vector2d(2000, 700));
-    //fast_wizard = fast_wizard_new_entity(gfc_vector2d(2500, 700));
-    //melee_wizard = melee_wizard_new_entity(gfc_vector2d(1000, 700));
-    //boss_wizard = end_boss_new_entity(gfc_vector2d(3200, 700));
+    //pet = pets_new("owl_monster");
+    //pets_new_entity_placed(pet, gfc_vector2d(1500, 700));
+
+    //pet = pets_new("ember_monster");
+    //pets_new_entity_placed(pet, monsterposition);
+
+    basic_wizard = basic_wizard_new_entity(monsterposition);
+    fire_wizard = fire_wizard_new_entity(gfc_vector2d(1500, 400));
+    ice_wizard = ice_wizard_new_entity(gfc_vector2d(2000, 500));
+    fast_wizard = fast_wizard_new_entity(gfc_vector2d(2500, 800));
+    melee_wizard = melee_wizard_new_entity(gfc_vector2d(1000, 600));
+    boss_wizard = end_boss_new_entity(gfc_vector2d(3200, 700));
     /*pinkMonster = pets_new_entity(monsterposition);
     pinkMonster->hasPet = PT_Pink;
     slog("Pet count: %d", pinkMonster->count);*/
@@ -178,29 +200,76 @@ void level_free()
     entity_system_clear_all(); // Clear all entities like player, monster, etc.
     items_clear_all();         // Clear all items like waffle
     button_system_clear_all();
+    world_clear_tile_layer(world);
+    //gf2d_sprite_clear_all();
 
     // Set all entity pointers to NULL after clearing
-    player = NULL;
+    //player = NULL;
     monster = NULL;
     fire_wizard = NULL;
     ice_wizard = NULL;
     fast_wizard = NULL;
     melee_wizard = NULL;
     boss_wizard = NULL;
+    pet = NULL;
+    sprite = NULL;
 
     if (world)
     {
+        slog("Freeing old world");
         world_free(world);
         world = NULL;
     }
 
-    setup = 0;
+}
+
+Uint8 level_transition_flag(Uint8 flag)
+{
+    transition_flag = flag;
+    return transition_flag;
+}
+
+Uint8 get_level_transition_flag()
+{
+    return transition_flag;
 }
 
 void level_transition()
 {
+    //slog("Inside transition");
+
+    player->_inuse = 0;
+    if (multiplayer)player2->_inuse = 0;
     level_free();
+    player->position = position;
+    player->_inuse = 1;
+    if (multiplayer)player2->_inuse = 1;
+    //slog("Filename: %s", world_get_next_world());
+    //strcpy(filename, world_get_next_world());
+    //slog("Filename: %s", world_get_next_world());
+    if (strcmp("None", world_get_next_world()) == 0)
+    {
+        level_free();
+        setup = 0;
+        process = 0;
+        
+    }
+    else
+    {
+        filename = world_get_next_world();
+        slog("Loading world %s", filename);
+        level_setup();
+
+    }
+
+
+
+    transition_flag = 0;
+
 }
+
+
+
 
 
 void level_main_menu()
@@ -213,7 +282,7 @@ void level_main_menu()
 
         if (window) window_free(window); // Free old window if it somehow exists
         window = main_menu();
-
+        filename = "maps/testworld.txt";
         setup = 1;
     }
 

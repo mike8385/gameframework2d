@@ -69,6 +69,9 @@ void ice_wizard_attack(Entity* self);
 */
 void ice_wizard_status(Entity* self);
 
+void ice_wizard_free(Entity* self);
+
+
 
 #endif
 #pragma once

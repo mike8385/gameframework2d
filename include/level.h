@@ -21,12 +21,14 @@ World* world;
 
 
 Entity* player;
+Entity* player2;
 Entity* monster;
 Entity* fire_wizard;
 Entity* ice_wizard;
 Entity* fast_wizard;
 Entity* melee_wizard;
 Entity* boss_wizard;
+Entity* basic_wizard;
 Entity* pinkMonster;
 Entity* pet;
 GFC_Vector2D position;
@@ -41,10 +43,28 @@ void level_process();
 
 void level_setup();
 
+/*
+* @brief Sets the transition flag to whatever value is passed.
+* @brief If its true (1), start the transition and set it back to false (0)
+* @param Flag to set it to
+* @return Flag
+*/
+Uint8 level_transition_flag(Uint8 flag);
+
+
+/*
+* @brief The transition to each world. Resets the filename to the next one.
+* 
+*/
+void level_transition();
+
 
 void level_free();
 
 void level_main_draw();
+
+Uint8 get_level_transition_flag();
+
 
 
 

@@ -5,8 +5,26 @@
 
 #include "gf2d_sprite.h"
 #include "gfc_text.h"
+#include "gfc_shape.h"
+#include "entity.h"
 
-typedef struct
+
+
+
+typedef enum
+{
+	item_default,
+	potion,
+	food,
+	coins,
+	MAX
+
+}ItemTypes;
+
+ItemTypes string_to_item_type(const char* typeStr);
+
+
+typedef struct item_S
 {
 	GFC_TextLine	name;
 	const char*		filename;
@@ -15,7 +33,12 @@ typedef struct
 	int				price;
 	GFC_Vector2D	position;
 	int				frame;
+	ItemTypes		type;
+	GFC_Rect		bounds;
 }Item;
+
+
+
 
 /**
 * @brief initialize and load item definitions
@@ -43,5 +66,12 @@ void items_draw_all();
 
 void items_clear_all();
 
+void item_collision(Item* self);
+
+Uint8 item_collision_check(Item* item, Entity* entity);
+
+void items_collide_all();
+
+void item_pickup(Item* item, Entity* player);
 
 #endif

@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include <string.h>
+
 #include "simple_logger.h"
 
 #include "fire_wizard.h"

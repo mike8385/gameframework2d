@@ -16,6 +16,7 @@ typedef struct S_stats
 }Stats;
 
 
+extern int multiplayer;
 
 /**
 * @brief spawn a new player entity
@@ -95,7 +96,7 @@ Uint8 get_player_pet();
 
 void player_update_pet(Uint8 bool);
 
-
+void player_use_items(Entity* self);
 
 #endif
 #pragma once

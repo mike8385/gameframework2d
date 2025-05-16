@@ -4,7 +4,7 @@
 			"name": "health_potion",
 			"displayName": "Health Potion",
 			"sprite": {
-				"filename": "images/itemslist.png",
+				"filename": "images/items/items_tiles.png",
 				"frame": 1
 			},
 			"price": 100,
@@ -17,6 +17,8 @@
 			"displayName": "Waffle",
 			"sprite": {
 				"filename": "images/food/food_tiles.png",
+				"frame_w":  64,
+				"frame_h":  64,
 				"frame": 0
 			},
 			"type": "food",
@@ -51,6 +53,16 @@
 			},
 			"type": "food",
 			"health": 40
+		},
+		{
+			"name": "coins",
+			"displayName": "Coins",
+			"sprite": {
+				"filename": "images/items/items_tiles.png",
+				"frame": 0
+			},
+			"type": "coins",
+			"health": 10
 		}
 	]
 }

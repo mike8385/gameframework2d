@@ -74,6 +74,7 @@ Window* main_menu()
 	Button*		but;
 	Button*		exit;
 	Button*		edit;
+	Button*		multiplayer;
 	GFC_TextLine text;
 	GFC_TextLine text2;
 
@@ -91,10 +92,13 @@ Window* main_menu()
 	but = button_new_button_text(gfc_vector2d(400, 100), gfc_vector2d(200, 60), GFC_COLOR_PURPLE, text);
 	exit = button_new_button_text(gfc_vector2d(700, 100), gfc_vector2d(200, 60), GFC_COLOR_RED, text2);
 	edit = button_new_button_text(gfc_vector2d(550, 300), gfc_vector2d(200, 60), GFC_COLOR_PINK, "Edit");
+	multiplayer = button_new_button_text(gfc_vector2d(550, 500), gfc_vector2d(200, 60), GFC_COLOR_ORANGE, "Multiplayer");
+
 
 	but->type = BT_NewGame;
 	exit->type = BT_Exit;
 	edit->type = BT_Edit;
+	multiplayer->type = BT_Multi;
 	gfc_list_append(win->buttons, but);
 	gfc_list_append(win->buttons, exit);
 	return win;

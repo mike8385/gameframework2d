@@ -64,6 +64,7 @@ void fire_wizard_attack(Entity* self);
 */
 void fire_wizard_status(Entity* self);
 
+void fire_wizard_free(Entity* self);
 
 #endif
 #pragma once

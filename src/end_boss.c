@@ -5,7 +5,7 @@
 #include "player.h"
 #include "magic.h"
 #include "status.h"
-
+#include "level.h"
 
 
 
@@ -21,6 +21,7 @@ Entity* end_boss_new_entity(GFC_Vector2D position)
 	gfc_vector2d_copy(self->position, position);
 	self->think = end_boss_think;
 	self->update = end_boss_update;
+	self->damage = end_boss_damage;
 	self->sprite = gf2d_sprite_load_all(
 		"images/players/wizardSprites/PNG/wizard/wizard_idle3.png",
 		128,
@@ -35,6 +36,7 @@ Entity* end_boss_new_entity(GFC_Vector2D position)
 	new_status_assign(self);
 	self->velocity.x = -2;
 	self->velocity.y = 0;
+	self->isBoss = 1;
 
 	return self;
 
@@ -109,8 +111,7 @@ void end_boss_damage(Entity* self)
 	{
 		//slog("Health: %d", self->health);
 
-	//	slog("Died");
-		currentLevel++;
+		slog("Died");
 		entity_free(self);
 	}
 }

@@ -10,6 +10,7 @@
 #include "entity.h"
 #include "world.h"
 #include "camera.h"
+#include "level.h"
 
 
 typedef struct {
@@ -52,6 +53,23 @@ EntityTypeCollide string_to_collision_type(const char* typeStr) {
 
 	slog("Unknown collision type: %s", typeStr);
 	return ETC_entity; // Default fallback
+}
+
+
+
+MagicType string_to_magic_type(const char* typeStr)
+{
+	if (!typeStr) return MT_magic; // Default
+
+	if (strcmp(typeStr, "MT_magic") == 0) return MT_magic;
+	if (strcmp(typeStr, "MT_fire") == 0) return MT_fire;
+	if (strcmp(typeStr, "MT_rapid") == 0) return MT_rapid;
+	if (strcmp(typeStr, "MT_freeze") == 0) return MT_freeze;
+	if (strcmp(typeStr, "MT_melee") == 0) return MT_melee;
+	if (strcmp(typeStr, "MT_MAX") == 0) return MT_MAX;
+
+	slog("Unknown collision type: %s", typeStr);
+	return MT_magic; // Default fallback
 }
 
 void entity_system_close()
@@ -272,7 +290,7 @@ void entity_bounds_update(Entity* self)
 		if (self->bounds.x < worldBounds.x)
 		{
 			
-			self->position.x = worldBounds.x;
+			self->position.x  = worldBounds.x;
 			
 
 		}
@@ -287,6 +305,8 @@ void entity_bounds_update(Entity* self)
 		if (self->bounds.x + self->bounds.w > worldBounds.x + worldBounds.w)
 		{
 			self->position.x  = worldBounds.x + worldBounds.w - self->bounds.w;
+			if (self->isPlayer) level_transition_flag(1);
+
 
 		}
 
@@ -350,6 +370,7 @@ GFC_List* entity_collide_all(Entity* self)
 	if (!self) return;
 	int i;
 	GFC_List* entities;
+
 	EntityTypeCollide selfType = self->collidedType;
 
 	entities = gfc_list_new();
@@ -395,6 +416,13 @@ void update_entity_lifetime(Entity* self) {
 void entity_damage(Entity* self, Entity* other)
 {
 	//slog("%f", other->health);
+	if (!self) return;
+	if (!other) return;
+	if (other->damage)
+	{
+		other->damage(other, self, self->damageDelt);
+	}
+
 	other->health = other->health - self->damageDelt;
 	if (other->health <= 0.0f)
 	{
@@ -403,8 +431,49 @@ void entity_damage(Entity* self, Entity* other)
 			entity_free(other);
 
 		}
+
 	}
 
+}
+
+void entity_status(Entity* self)
+{
+	if (!self) return;
+
+	if (!self->statusEffects) return;
+
+	if (self->status) self->status;
+}
+
+void entity_track_player(Entity* self)
+{
+	if (!self) return;
+
+
+	if (self->track_player) self->track_player;
+
+	return;
+}
+
+void entity_see_player(Entity* self)
+{
+	if (!self) return;
+
+
+	if (self->see_player) self->see_player;
+
+	return;
+}
+
+
+Uint32 entity_system_get_max() {
+	return entity_system.entity_max;
+}
+
+
+Entity* entity_system_get_entity(Uint32 index) {
+	if (index >= entity_system.entity_max) return NULL;
+	return &entity_system.entity_list[index];
 }
 
 

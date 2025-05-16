@@ -1,7 +1,7 @@
 #include "simple_logger.h"
 
 #include "inventory.h"
-#include "items.h";
+#include "items.h"
 #include "gfc_list.h"
 
 
@@ -9,6 +9,9 @@ void inventory_init(Inventory* inventory)
 {
 	if (!inventory)return;
 	inventory->itemsList = gfc_list_new();
+	inventory->coins = 0;
+	inventory->itemIndex = NULL;
+	inventory->selectedItem = NULL;
 }
 
 Item* inventory_get_item_by_name(Inventory* inventory, const char* name)

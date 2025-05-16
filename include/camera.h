@@ -36,6 +36,10 @@ void camera_center_on(GFC_Vector2D point);
 
 void camera_center_on_mouse();
 
+//void camera_center_on_two_players(GFC_Vector2D point1, GFC_Vector2D point2);
+
+
+void camera_center_on_two_players(GFC_Vector2D point1, GFC_Vector2D point2);
 
 #endif
 

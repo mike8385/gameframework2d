@@ -5,6 +5,7 @@
 #include "gf2d_sprite.h"
 #include "gf2d_draw.h"
 #include "gfc_input.h"
+#include "SDL_audio.h"
 
 #include "commands.h"
 
@@ -13,11 +14,13 @@
 #include "camera.h"
 #include "entity.h"
 #include "player.h"
+#include "player2.h"
 #include "monster.h"
 #include "fire_wizard.h"
 #include "fast_wizard.h"
 #include "ice_wizard.h"
 #include "melee_wizard.h"
+#include "basic_wizard.h"
 #include "end_boss.h"
 #include "particles.h"
 #include "gfc_vector.h"
@@ -32,7 +35,7 @@
 #include "status.h"
 
 #include "UI.h"
-//#include "level.h"
+#include "level.h"
 
 
 Uint8 _DRAWBOUNDS_ = 0;
@@ -40,6 +43,7 @@ int process = 0;
 int done = 0;
 int currentLevel = 0;
 const Uint8* keys;
+int multiplayer = 0;
 
 
 
@@ -47,6 +51,37 @@ const Uint8* keys;
 
 int main(int argc, char* argv[])
 {
+
+    multiplayer = 0;
+
+    /* Initialize SDL Audio */
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        slog("SDL audio initialization failed: %s", SDL_GetError());
+        return -1;
+    }
+
+    /* Load WAV file */
+    SDL_AudioSpec wavSpec;
+    Uint32 wavLength;
+    Uint8* wavBuffer;
+
+    if (SDL_LoadWAV("music/main_menu.wav", &wavSpec, &wavBuffer, &wavLength) == NULL) {
+        slog("Failed to load WAV file: %s", SDL_GetError());
+        return -1;
+    }
+
+    /* Open audio device */
+    SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
+    if (audioDevice == 0) {
+        slog("Failed to open audio device: %s", SDL_GetError());
+        SDL_FreeWAV(wavBuffer);
+        return -1;
+    }
+
+    /* Play the sound */
+    SDL_QueueAudio(audioDevice, wavBuffer, wavLength);
+    SDL_PauseAudioDevice(audioDevice, 0);  // Start playing
+
     /*variable declarations*/
     const Uint8* keys;
     //Sprite* sprite;
@@ -89,39 +124,23 @@ int main(int argc, char* argv[])
     window_system_init(1024);
     //items_initalize("def/item.def");
     SDL_ShowCursor(SDL_DISABLE);
-    camera_set_size(gfc_vector2d(1200, 720));
+    //SDL_SetRelativeMouseMode(SDL_TRUE);
 
+    camera_set_size(gfc_vector2d(1200, 720));
+    SDL_audio_h_
     gfc_config_def_init();
     items_initalize("def/item.def");
+    pets_initalize("def/pets.def");
 
     //gfc_config_def_load("def/spray_particle.def");
 
-    /*demo setup*/
-    //sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
-    //world = world_load("maps/testworld.txt");
-    //if (!world) {
-  //      slog("ERROR: Failed to load world!");
-   // }
-    //mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
-    /*window = main_menu();*/
 
-    //particle_system_draw();
 
-    //player = player_new_entity(position);
-   // monster = monster_new_entity(monsterposition);
-   // fire_wizard = fire_wizard_new_entity(gfc_vector2d(1000, 500));
-    //ice_wizard = ice_wizard_new_entity(gfc_vector2d(2000, 500));
-    //fast_wizard = fast_wizard_new_entity(gfc_vector2d(2500, 500));
-    //melee_wizard = melee_wizard_new_entity(gfc_vector2d(700, 500));
-   // boss_wizard = end_boss_new_entity(gfc_vector2d(2000, 500));
-
-    //world = world_test_new();
-
-    //world_save(world, "maps/testsave.map");
     slog("press [escape] to quit");
     /*main game loop*/
     while (!done)
     {
+        //slog("%s", world_get_next_world());
         cmds();
         gfc_input_update();
      //   SDL_PumpEvents();   // update SDL's internal event structures
@@ -145,22 +164,15 @@ int main(int argc, char* argv[])
 
         //entity_system_update();
         //entity_system_move();
-
-
         switch (process)
         {
         case 1:
+            SDL_ClearQueuedAudio(audioDevice);  // Stop current sound
               level_process();
               break;
         case 2:
             level_editor();
-            break;
-        //case 3:
-        //    level_transition();
-        //    break;
-        //case 4:
-        //    level2_process();
-        //    
+            break;  
         default:
               level_main_menu();
               break;
@@ -220,6 +232,7 @@ int main(int argc, char* argv[])
             switch (process) {
             case 1:
                 level_free();
+                setup = 0;
                 break;
             case 2:
                 level_editor_free();
@@ -228,7 +241,13 @@ int main(int argc, char* argv[])
                 slog("Nothing assigned, this is default");
             }
             process = 0; // exit condition
+            multiplayer = 0;
 
+        }
+
+        if (get_level_transition_flag())
+        {
+            level_transition();
         }
 
 
@@ -236,6 +255,9 @@ int main(int argc, char* argv[])
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
     }
     level_free();
+    SDL_CloseAudioDevice(audioDevice);
+    SDL_FreeWAV(wavBuffer);
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);
     //entity_free(player);
     //world_free(world);
     //Mix_HaldMusic
@@ -274,3 +296,34 @@ LoadWAV - Load a WAV file and convert into a mixed chunk handle (Must free) [WAV
 Vector2D(x, y* .5% + z-1 *.5)
 
 */
+
+
+//// Load menu music
+//if (SDL_LoadWAV("music/main_menu.wav", &menuSpec, &menuWavBuffer, &menuWavLength) == NULL) {
+//    slog("Failed to load menu WAV: %s", SDL_GetError());
+//    return -1;
+//}
+//
+//// Load game music
+//if (SDL_LoadWAV("music/game_theme.wav", &gameSpec, &gameWavBuffer, &gameWavLength) == NULL) {
+//    slog("Failed to load game WAV: %s", SDL_GetError());
+//    SDL_FreeWAV(menuWavBuffer);
+//    return -1;
+//}
+//
+//// Open audio device (use menuSpec as default)
+//audioDevice = SDL_OpenAudioDevice(NULL, 0, &menuSpec, NULL, 0);
+//if (audioDevice == 0) {
+//    slog("Failed to open audio device: %s", SDL_GetError());
+//    SDL_FreeWAV(menuWavBuffer);
+//    SDL_FreeWAV(gameWavBuffer);
+//    return -1;
+//}
+//
+//
+//
+//void play_sound(Uint8* buffer, Uint32 length) {
+//    SDL_ClearQueuedAudio(audioDevice);  // Stop current sound
+//    SDL_QueueAudio(audioDevice, buffer, length);  // Queue new sound
+//    SDL_PauseAudioDevice(audioDevice, 0);  // Play
+//}

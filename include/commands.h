@@ -24,6 +24,11 @@ void cmds();
 */
 void cmd_get_player_location(Entity* player);
 
+/*
+* @brief Gets the players list of inventory items and sends it to the console
+* @param The player entity itself
+*/
+void cmd_get_player_inven(Entity* player);
 
 
 

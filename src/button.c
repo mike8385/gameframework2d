@@ -230,6 +230,8 @@ void button_click_actions(Button* self)
 		{
 			switch (self->type)
 			{
+			case BT_Multi:
+				multiplayer = 1;
 			case BT_NewGame:
 				slog("New Game Button Pressed");
 				process = 1;

@@ -67,5 +67,8 @@ void fast_wizard_attack(Entity* self);
 void fast_wizard_status(Entity* self);
 
 
+//void fast_wizard_free(Entity* self);
+
+
 #endif
 #pragma once

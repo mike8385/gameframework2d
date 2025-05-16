@@ -72,3 +72,47 @@ void camera_center_on_mouse()
 	// Now center camera on the mouse's world position
 	camera_center_on(mouseWorldPos);
 }
+
+//void camera_center_on_two_players(GFC_Vector2D point1, GFC_Vector2D point2)
+//{
+//    // Calculate midpoint between the two players
+//    GFC_Vector2D midpoint;
+//    midpoint.x = (point1.x + point2.x) * 0.5f;
+//    midpoint.y = (point1.y + point2.y) * 0.5f;
+//
+//    // Calculate distance between players
+//	
+//    float distance = gfc_vector2d_magnitude(vector2d(point1.x - point2.x, point1.y - point2.y));
+//
+//    // Determine zoom level based on player distance (optional)
+//    float minZoom = 1.0f;  // Minimum zoom level
+//    float maxZoom = 0.5f;  // Maximum zoom level
+//    float zoomDistanceThreshold = 500.0f; // Distance at which zoom starts changing
+//
+//    float zoom = minZoom;
+//    if (distance > zoomDistanceThreshold) {
+//        zoom = minZoom - ((distance - zoomDistanceThreshold) / 1000.0f);
+//        if (zoom < maxZoom) zoom = maxZoom;
+//    }
+//
+//    // Center camera on midpoint
+//    _camera.camera.x = midpoint.x - (_camera.camera.w * 0.5f * zoom);
+//    _camera.camera.y = midpoint.y - (_camera.camera.h * 0.5f * zoom);
+//
+//    // Apply zoom (if you want zoom functionality)
+//    //_camera.zoom = zoom;
+//}
+void camera_center_on_two_players(GFC_Vector2D point1, GFC_Vector2D point2)
+{
+	// Calculate midpoint
+	_camera.camera.x = ((point1.x + point2.x) * 0.5f) - (_camera.camera.w * 0.5f);
+	_camera.camera.y = ((point1.y + point2.y) * 0.5f) - (_camera.camera.h * 0.5f);
+
+	// Optional: Keep players within certain distance
+	float max_player_distance = 600.0f;
+	float actual_distance = gfc_vector2d_magnitude(gfc_vector2d(point1.x - point2.x, point1.y - point2.y));
+
+	if (actual_distance > max_player_distance) {
+		// Push players closer together (or implement your preferred behavior)
+	}
+}
